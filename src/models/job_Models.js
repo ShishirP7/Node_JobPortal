@@ -1,0 +1,51 @@
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+
+const JobSchema = new Schema({
+  employerID: {
+    type: Schema.Types.ObjectId,
+    ref: "Employer",
+    required: true,
+  },
+  isApproved: {
+    type: Boolean,
+    default: false,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+
+  company: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  salary: {
+    type: Number,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  jobType: {
+    type: String,
+    // enum: ["Full-time", "Part-time", "Freelance", "Internship"],
+  },
+  skillsRequired: [
+    {
+      type: String,
+    },
+  ],
+  date: {
+    type: String,
+    default: Date.now,
+  },
+});
+
+module.exports = Job = mongoose.model("jobs", JobSchema);
