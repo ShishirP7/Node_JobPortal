@@ -57,7 +57,9 @@ const addJob = async (req, res) => {
   try {
     const existingUser = await employerModel.findById(employerID);
 
-    if (existingUser) {
+
+
+    if (existingUser && existingUser.verified) {
       const jobVacancy = await jobModel.create({
         title: title,
         company: company,
@@ -69,6 +71,7 @@ const addJob = async (req, res) => {
         date: date,
         employerID: employerID,
         isApproved: false,
+        category: 0
       });
 
       // const token = jwt.sign(
@@ -80,7 +83,15 @@ const addJob = async (req, res) => {
         success: true,
         message: "Posted Successfully",
       });
+    } if (!existingUser) {
+      res.json({ message: "Not a valid User" })
     }
+
+    if (!existingUser.verified) {
+      res.json({ message: "This account is not verified to Add a vacancy" })
+    }
+
+
   } catch (err) {
     console.log(err);
     res.json({ message: err.message });
@@ -90,32 +101,71 @@ const addJob = async (req, res) => {
 const jobBookmarks = async (req, res) => {
   try {
     const { jobid, seekerid } = req.body;
-    const DuplicateSavedItem = await SavedJobs.find({
-      job_id: jobid,
-      seeker_id: seekerid,
-    });
+    const checkJobID = await jobModel.findById(jobid);
+    const checkSeekerID = await jobSeekerModel.findById(seekerid);
+    if (checkJobID && checkSeekerID) {
+      const DuplicateSavedItem = await SavedJobs.find({
+        job_id: jobid,
+        seeker_id: seekerid,
+      });
+      if (DuplicateSavedItem.length > 0) {
+        const removesavedItem = await SavedJobs.findOneAndDelete({
+          job_id: jobid,
+          seeker_id: seekerid,
+        });
+        res.json({
+          data: removesavedItem,
+          message: "Job has been removed successfully from the list",
+          succes: true,
+        });
 
-    // res.json({ message: DuplicateSavedItem });
-
-    const BookedJob = await SavedJobs.create({
-      job_id: jobid,
-      seeker_id: seekerid,
-    });
-    res.json({
-      data: BookedJob,
-      succes: true,
-      message: "Saved ",
-    });
+        // res.json(DuplicateSavedItem);
+      } else {
+        const BookedJob = await SavedJobs.create({
+          job_id: jobid,
+          seeker_id: seekerid,
+        });
+        res.json({
+          data: BookedJob,
+          succes: true,
+          message: "Bookmark Added to List  ",
+        });
+      }
+    } else {
+      if (!checkJobID) {
+        res.json({ message: "Job ID is invalid", success: false });
+      }
+      if (!checkSeekerID) {
+        res.json({ message: "Seeker ID is invalid ", success: false });
+      }
+      if (!checkSeekerID && !checkJobID) {
+        res.json({ message: "Invalid User and Invalid Job", success: false });
+      } else {
+        console.log("errorr");
+      }
+    }
   } catch (error) {
     console.log(error);
     res.json({ message: error.message });
   }
 };
 
-const getAllSavedJobs = async (req, res) => {
+const getSavedJobs = async (req, res) => {
   try {
-    const SavedJobslist = await SavedJobs.find({});
-    res.json({ data: SavedJobslist, success: true });
+    const seekerID = req.query.id;
+    const existingUser = await jobSeekerModel.findById(seekerID);
+    if (existingUser) {
+      const savedJobs = await SavedJobs.find({
+        seeker_id: seekerID,
+      });
+      res.json({
+        data: savedJobs,
+        success: true,
+        message: "these are the saved jobs by the user.",
+      });
+    } else {
+      res.json({ message: "This User is not valid " });
+    }
   } catch (error) {
     console.log(error);
     res.json({ message: error.message });
@@ -129,5 +179,5 @@ module.exports = {
   getjobsByID,
   removeJob,
   jobBookmarks,
-  getAllSavedJobs,
+  getSavedJobs,
 };

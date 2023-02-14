@@ -6,6 +6,17 @@ const employerSchema = new mongoose.Schema({
     maxLength: [50, "Name cannot exceed 50 characters"],
     required: [true, "Employer Name is Required"],
   },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
+  // companyName: {
+  //   type: String,
+  //   minLength: [3, "Name cannot be less than 3 characters"],
+  //   maxLength: [50, "Name cannot exceed 50 characters"],
+  //   required: [true, "Employer Name is Required"],
+
+  // },
   email: {
     type: String,
     match: [

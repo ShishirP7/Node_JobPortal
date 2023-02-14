@@ -5,6 +5,8 @@ const seekerRouter = express.Router();
 seekerRouter.post("/signUp", signUp);
 seekerRouter.post("/login", login);
 seekerRouter.post("/reset", reset);
+seekerRouter.post("/reset", reset);
+
 
 
 module.exports = seekerRouter;

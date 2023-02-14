@@ -5,11 +5,14 @@ const { create } = require("../models/SeekerModels/jobSeeker_Model");
 const SERCRET_KEY = "JOBPortal";
 
 const signUp = async (req, res) => {
-  const { username, email, password, phoneNumber } = req.body;
+  const { name, email, password, phoneNumber } = req.body;
+  const existingUser = await seekerModel.findOne({ email: email });
+
   try {
+
     const hasedPassword = await bcrypt.hash(password, 10);
     const createdUser = await seekerModel.create({
-      name: username,
+      name: name,
       email: email,
       password: hasedPassword,
       phoneNumber: phoneNumber,
@@ -18,7 +21,10 @@ const signUp = async (req, res) => {
       { email: createdUser.email, id: createdUser._id },
       SERCRET_KEY
     );
-    res.status(201).json({ data: createdUser, token: token });
+    res.status(201).json({ data: createdUser, token: token, success: true });
+
+
+
   } catch (error) {
     console.log(error);
     res.json({ message: error.message });
@@ -44,7 +50,7 @@ const login = async (req, res) => {
       { email: existingUser.email, id: existingUser._id },
       SERCRET_KEY
     );
-    res.status(201).json({ data: existingUser, token: token });
+    res.status(201).json({ data: existingUser, token: token, success: true });
   } catch (error) {
     console.log(error);
     res.json({ message: error.message });
