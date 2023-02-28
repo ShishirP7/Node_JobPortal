@@ -1,12 +1,16 @@
 const express = require("express");
 require("dotenv").config();
+const cors = require("cors")
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 // To process JSON Request
 app.use(express.json({}));
 app.use(express.urlencoded({ extended: true }));
 // To process JSON Request
+
+app.use(cors())
 
 const db = require("./db/dbconfig");
 

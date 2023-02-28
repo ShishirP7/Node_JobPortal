@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const { UserRoles } = require("../utils/enum");
 const Schema = mongoose.Schema;
 
-const AdminSchema = new Schema({
+const AdminSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -13,6 +14,10 @@ const AdminSchema = new Schema({
       "Please provide a valid email",
     ],
     unique: [true, "The email cannot be duplicate"],
+  },
+  role: {
+    type: Number,
+    require: [true, 'Specify a user role']
   },
   password: {
     type: String,

@@ -5,6 +5,7 @@ const {
   reset,
   deleteEmployer,
   approveJob,
+  approveEmployer,
 } = require("../controllers/adminController");
 const adminRouter = express.Router();
 
@@ -13,5 +14,7 @@ adminRouter.post("/login", login);
 adminRouter.post("/reset", reset);
 adminRouter.post("/deleteEmployer", deleteEmployer);
 adminRouter.post("/approveJob", approveJob);
+adminRouter.post("/approveEmployer", approveEmployer);
+
 
 module.exports = adminRouter;

@@ -11,6 +11,10 @@ const JobSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  category: {
+    type: Number,
+    default: 0 //["normal","hot","premium" ,"featured"]
+  },
   title: {
     type: String,
     required: true,
@@ -19,7 +23,6 @@ const JobSchema = new Schema({
   company: {
     type: String,
     required: true,
-    unique: true,
   },
   location: {
     type: String,
