@@ -51,7 +51,6 @@ const addJob = async (req, res) => {
     description,
     jobType,
     skillsRequired,
-    date,
   } = req.body;
 
   try {
@@ -68,7 +67,6 @@ const addJob = async (req, res) => {
         description: description,
         jobType: jobType,
         skillsRequired: skillsRequired,
-        date: date,
         employerID: employerID,
         isApproved: false,
         category: 0

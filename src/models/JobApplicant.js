@@ -7,9 +7,9 @@ const ApplicantSchema = new Schema({
     ref: "jobs",
     required: true,
   },
-  seekerID: {
+  userID: {
     type: Schema.Types.ObjectId,
-    ref: "JobSeekerInfo",
+    ref: "JobSeeker",
     required: true,
   },
   date: {
@@ -20,6 +20,14 @@ const ApplicantSchema = new Schema({
     type: String,
     required: true,
   },
+  cover_letter: {
+    type: String,
+    default: null
+  },
+  about: {
+    type: String,
+    default: null
+  }
 });
 
 module.exports = Applicant = mongoose.model("applicant", ApplicantSchema);

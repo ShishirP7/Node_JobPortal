@@ -19,9 +19,14 @@ const jobSeekerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    require: [true, 'Specify a user role']
+  },
 
   resume: {
     type: String,
+    default: ""
   },
 
   phoneNumber: {
@@ -32,30 +37,134 @@ const jobSeekerSchema = new mongoose.Schema({
   },
   address: {
     type: String,
+    default: ""
+
+
   },
   profileimg: {
     type: String,
+    default: ""
+
   },
   interests: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "Interests",
+    type: [String]
+
   },
-  education: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "Education",
-  },
+  education: [
+    {
+      school: {
+        type: String,
+        required: true
+      },
+      degree: {
+        type: String,
+        required: true
+      },
+      fieldOfStudy: {
+        type: String,
+        required: true
+      },
+      from: {
+        type: Date,
+        required: true
+      },
+      to: {
+        type: Date
+      },
+      current: {
+        type: Boolean,
+        default: false
+      },
+      description: {
+        type: String
+      }
+    }
+  ],
   skills: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "Skill",
+    type: [String]
   },
-  trainings: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "Trainings",
+  trainings: [
+    {
+      title: {
+        type: String,
+        required: true
+      },
+      organization: {
+        type: String,
+        required: true
+      },
+      location: {
+        type: String
+      },
+      certificate: {
+        type: String
+      },
+      description: {
+        type: String
+      }
+    }
+  ],
+  social: {
+    website: {
+      type: String,
+      default: ""
+
+    },
+    twitter: {
+      type: String,
+      default: ""
+    },
+    linkedin: {
+      type: String,
+      default: ""
+    },
+    facebook: {
+      type: String,
+      default: ""
+    },
+    github: {
+      type: String,
+      default: ""
+    },
+    instagram: {
+      type: String,
+      default: ""
+    },
+
   },
-  experience: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: "Experience",
+  date: {
+    type: Date,
+    default: Date.now
   },
+  experience: [
+    {
+      title: {
+        type: String,
+        required: true
+      },
+      company: {
+        type: String,
+        required: true
+      },
+      location: {
+        type: String
+      },
+      from: {
+        type: Date,
+        required: true
+      },
+      to: {
+        type: Date
+      },
+      current: {
+        type: Boolean,
+        default: false
+      },
+      description: {
+        type: String
+      }
+    }
+  ],
 });
 
 const JobSeeker = mongoose.model("JobSeeker", jobSeekerSchema);

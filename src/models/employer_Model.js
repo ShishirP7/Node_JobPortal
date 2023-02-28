@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const UserRoles = require("../utils/enum")
 const employerSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,13 +11,7 @@ const employerSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  // companyName: {
-  //   type: String,
-  //   minLength: [3, "Name cannot be less than 3 characters"],
-  //   maxLength: [50, "Name cannot exceed 50 characters"],
-  //   required: [true, "Employer Name is Required"],
 
-  // },
   email: {
     type: String,
     match: [
@@ -29,6 +24,10 @@ const employerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    require: [true, 'Specify a user role']
+  },
   phoneNumber: {
     type: Number,
     match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
@@ -40,6 +39,10 @@ const employerSchema = new mongoose.Schema({
   },
   website: {
     type: String,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
   },
 });
 const Employer = mongoose.model("Employer", employerSchema);
