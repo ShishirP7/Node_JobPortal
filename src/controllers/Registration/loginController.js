@@ -25,7 +25,7 @@ const loginController = async (req, res) => {
 
 
 const loginJobSeeker = async (req, res) => {
-    const { email,password } = req.body
+    const { email, password, role } = req.body
     const existingUser = await JobSeeker.findOne({ email: email });
     if (!existingUser) {
         return res.json({ message: "User Not Found !!" });
@@ -39,7 +39,7 @@ const loginJobSeeker = async (req, res) => {
     }
 
     const token = jwt.sign(
-        { email: existingUser.email, id: existingUser._id },
+        { email: existingUser.email, id: existingUser._id, role: role },
         SERCRET_KEY
     );
     res.status(201).json({ data: existingUser, token: token, success: true });
@@ -64,7 +64,7 @@ const loginEmployer = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { email: existingUser.email, id: existingUser._id },
+            { email: existingUser.email, id: existingUser._id, role: role },
             SERCRET_KEY
         );
         res.send({ success: true, data: existingUser, token: token, message: "Login Success" });

@@ -23,6 +23,9 @@ const jobSeekerSchema = new mongoose.Schema({
     type: String,
     require: [true, 'Specify a user role']
   },
+  token: {
+    type: String,
+  },
 
   resume: {
     type: String,
