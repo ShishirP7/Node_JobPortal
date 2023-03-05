@@ -2,7 +2,8 @@ const adminModel = require("../models/admin_Model");
 const jobModel = require("../models/job_Models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const employerModel = require("../models/employer_Model")
+const employerModel = require("../models/employer_Model");
+const { signupSuccessEmail } = require("../services/mailerService");
 const SERCRET_KEY = "JOBPortal";
 
 const signUp = async (req, res) => {
@@ -23,7 +24,7 @@ const signUp = async (req, res) => {
 
       signupSuccessEmail(createdUser, message = `Hello ${createdUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
 
-      res.json({ success: true, token: token, message: "Account  created Successfully" });
+      res.json({ success: true, message: "Account  created Successfully" });
     } else {
       res.json({ message: "User already exists with this Email", success: false })
     }

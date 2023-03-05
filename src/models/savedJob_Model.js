@@ -10,7 +10,7 @@ const savedJobsSchema = new mongoose.Schema({
 
   seeker_id: {
     type: Schema.Types.ObjectId,
-    ref: "JobSeekerInfo",
+    ref: "JobSeeker",
     required: true,
   },
   // date: {

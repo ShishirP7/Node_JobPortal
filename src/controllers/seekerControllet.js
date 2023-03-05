@@ -185,8 +185,8 @@ const apply = async (req, res) => {
     const JobExists = await job_Models.findById(job_id)
     if (UserExists && JobExists) {
       const newApplicant = await JobApplicant.create({
-        jobId: job_id,
-        userID: user_id,
+        job_id: job_id,
+        user_id: user_id,
         cover_letter: cover_letter,
         about: about,
         resume: resume

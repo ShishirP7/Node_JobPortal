@@ -13,5 +13,4 @@ seekerRouter.post("/apply", apply);
 
 
 
-
 module.exports = seekerRouter;

@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const employerModel = require("../models/employer_Model");
 const jobSeekerModel = require("../models/SeekerModels/jobSeeker_Model");
 const SavedJobs = require("../models/savedJob_Model");
+const JobApplicant = require("../models/JobApplicant");
+const job_Models = require("../models/job_Models");
+const { find } = require("../models/savedJob_Model");
 
 const getApprovedJobs = async (req, res) => {
   const Joblists = await jobModel.find({ isApproved: true });
@@ -13,6 +16,22 @@ const getPostedJobs = async (req, res) => {
   const Joblists = await jobModel.find({ isApproved: false });
   res.json({ data: Joblists, success: true });
 };
+
+const getJobDetailsbyID = async (req, res) => {
+  try {
+    const job_id = req.query.id
+    const jobDetails = await jobModel.findById(job_id)
+    if (jobDetails) {
+      res.json({ success: true, message: "Fetching Job details with Job ID successful", data: jobDetails })
+
+    } else {
+      res.json({ message: "NO job found with this id ", success: false })
+    }
+
+  } catch (error) {
+
+  }
+}
 
 const getjobsByID = async (req, res) => {
   try {
@@ -50,8 +69,10 @@ const addJob = async (req, res) => {
     salary,
     description,
     jobType,
-    skillsRequired,
+    skillsRequired, Experience, responsibility, qualifications, benifits, contactEmail, jobTiming, vacancy
+
   } = req.body;
+
 
   try {
     const existingUser = await employerModel.findById(employerID);
@@ -69,7 +90,14 @@ const addJob = async (req, res) => {
         skillsRequired: skillsRequired,
         employerID: employerID,
         isApproved: false,
-        category: 0
+        category: 0,
+        Experience: Experience,
+        responsibility: responsibility,
+        qualifications: qualifications,
+        benifits: benifits,
+        contactEmail: contactEmail,
+        jobTiming: jobTiming,
+        vacancy: vacancy
       });
 
       // const token = jwt.sign(
@@ -113,61 +141,46 @@ const jobBookmarks = async (req, res) => {
         });
         res.json({
           data: removesavedItem,
-          message: "Job has been removed successfully from the list",
+          message: "Removed ",
           succes: true,
+          status: false
         });
 
         // res.json(DuplicateSavedItem);
       } else {
         const BookedJob = await SavedJobs.create({
           job_id: jobid,
-          seeker_id: seekerid,
-        });
+          seeker_id: "63fdce04f088a1c023aab9e3",
+        })
         res.json({
           data: BookedJob,
           succes: true,
-          message: "Bookmark Added to List  ",
+          status: true,
+          message: "Added to List",
         });
-      }
-    } else {
-      if (!checkJobID) {
-        res.json({ message: "Job ID is invalid", success: false });
-      }
-      if (!checkSeekerID) {
-        res.json({ message: "Seeker ID is invalid ", success: false });
-      }
-      if (!checkSeekerID && !checkJobID) {
-        res.json({ message: "Invalid User and Invalid Job", success: false });
-      } else {
-        console.log("errorr");
       }
     }
   } catch (error) {
     console.log(error);
     res.json({ message: error.message });
   }
+
 };
 
 const getSavedJobs = async (req, res) => {
+
+  // const JOBS = await SavedJobs.find({}).populate('job_id').populate('seeker_id' ,'name');
+
   try {
-    const seekerID = req.query.id;
-    const existingUser = await jobSeekerModel.findById(seekerID);
-    if (existingUser) {
-      const savedJobs = await SavedJobs.find({
-        seeker_id: seekerID,
-      });
-      res.json({
-        data: savedJobs,
-        success: true,
-        message: "these are the saved jobs by the user.",
-      });
-    } else {
-      res.json({ message: "This User is not valid " });
-    }
+    const jobseekerId = req.query.id;
+    const savedJobs = await SavedJobs.find({ seeker_id: jobseekerId }).populate('job_id')
+    res.json({ data: savedJobs, success: true })
+
   } catch (error) {
-    console.log(error);
-    res.json({ message: error.message });
+    res.json({ error: error.message, success: false })
   }
+
+
 };
 
 module.exports = {
@@ -178,4 +191,5 @@ module.exports = {
   removeJob,
   jobBookmarks,
   getSavedJobs,
+  getJobDetailsbyID
 };

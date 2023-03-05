@@ -4,8 +4,8 @@ const admin = require("./admin.router");
 const jobseekers = require("./jobseekers.router");
 const employer = require("./employer.router");
 const jobs = require("./jobs.router");
-const { loginController } = require("../controllers/Registration/loginController");
-const { signUpController } = require("../controllers/Registration/signUpController");
+const { signUpController } = require("../controllers/LoginSignUp/signUpController");
+const { loginController } = require("../controllers/LoginSignUp/loginController");
 
 router.all("/", (req, res) => {
   res.send(" Hello !!");

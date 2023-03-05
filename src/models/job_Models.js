@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { stringify } = require("uuid");
 const Schema = mongoose.Schema;
 
 const JobSchema = new Schema({
@@ -29,7 +30,7 @@ const JobSchema = new Schema({
     required: true,
   },
   salary: {
-    type: Number,
+    type: String,
     required: true,
   },
   description: {
@@ -45,10 +46,32 @@ const JobSchema = new Schema({
       type: String,
     },
   ],
+  Experience: {
+    type: String
+  },
+  responsibility: {
+    type: String
+  },
+  qualifications: {
+    type: String
+  },
+  benifits: {
+    type: String
+  },
+  contactEmail: {
+    type: String
+  },
+  jobTiming: {
+    type: String
+  },
+  vacancy: {
+    type: Number
+  },
   date: {
     type: String,
     default: Date.now,
   },
+
 });
 
 module.exports = Job = mongoose.model("jobs", JobSchema);
