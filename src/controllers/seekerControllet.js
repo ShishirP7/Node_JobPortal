@@ -10,57 +10,7 @@ const tokenSchema = require("../models/tokenSchema");
 const { sendMail } = require("../config/nodemailer/mailer");
 const Employer = require("../models/employer_Model");
 
-const signUp = async (req, res) => {
-  const { name, email, password, phoneNumber, role } = req.body;
 
-  try {
-
-    const hasedPassword = await bcrypt.hash(password, 10);
-    const createdUser = await seekerModel.create({
-      name: name,
-      email: email,
-      password: hasedPassword,
-      phoneNumber: phoneNumber,
-      role: role
-    });
-
-
-    signupSuccessEmail(createdUser, message = `Hello ${createdUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
-    res.status(201).json({ data: createdUser, success: true });
-
-
-
-  } catch (error) {
-    console.log(error);
-    res.json({ message: error.message });
-  }
-};
-
-// const login = async (req, res) => {
-//   const { email, password, role } = req.body;
-//   try {
-//     const existingUser = await seekerModel.findOne({ email: email });
-//     if (!existingUser) {
-//       return res.json({ message: "User Not Found !!" });
-//     }
-//     const authorizedUser = await bcrypt.compare(
-//       password,
-//       existingUser.password
-//     );
-//     if (!authorizedUser) {
-//       return res.json({ message: "Credentials Not Valid " });
-//     }
-
-//     const token = jwt.sign(
-//       { email: existingUser.email, id: existingUser._id },
-//       SERCRET_KEY
-//     );
-//     res.status(201).json({ data: existingUser, token: token, success: true });
-//   } catch (error) {
-//     console.log(error);
-//     res.json({ message: error.message });
-//   }
-// };
 const reset = async (req, res) => {
   const { email, password, newpassword } = req.body;
 
