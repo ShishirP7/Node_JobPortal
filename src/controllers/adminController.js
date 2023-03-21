@@ -123,7 +123,10 @@ const approveEmployer = async (req, res) => {
     const employer_id = req.query.id;
 
     const flaggedEmployer = await employerModel.findById(employer_id)
-    if (flaggedEmployer) {
+    if (flaggedEmployer && flaggedEmployer?.verified === true) {
+      res.json({ message: "This Employer is already verified ", success: true })
+    }
+    else if (flaggedEmployer && flaggedEmployer?.verified === false) {
 
       await employerModel.findByIdAndUpdate(employer_id, {
         verified: true

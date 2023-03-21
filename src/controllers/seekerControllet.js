@@ -129,7 +129,7 @@ const editProfile = async (req, res) => {
 }
 
 const apply = async (req, res) => {
-  const { user_id, job_id, cover_letter, about, resume } = req.body
+  const { user_id, job_id, about, resume } = req.body
   try {
     const UserExists = await seekerModel.findById(user_id)
     const JobExists = await job_Models.findById(job_id)
@@ -137,7 +137,6 @@ const apply = async (req, res) => {
       const newApplicant = await JobApplicant.create({
         job_id: job_id,
         user_id: user_id,
-        cover_letter: cover_letter,
         about: about,
         resume: resume
       });

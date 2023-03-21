@@ -20,13 +20,15 @@ const ApplicantSchema = new Schema({
     type: String,
     required: true,
   },
-  cover_letter: {
-    type: String,
-    default: null
-  },
+
   about: {
     type: String,
-    default: null
+    required: true,
+
+  },
+  isSelected: {
+    type: Boolean,
+    default: false,
   }
 });
 

@@ -15,13 +15,18 @@ const jobSeekerSchema = new mongoose.Schema({
     ],
     unique: [true, "The email cannot be duplicate"],
   },
+  title: {
+    type: String,
+    required: true,
+    default: ""
+  },
   password: {
     type: String,
     required: true,
   },
   role: {
     type: String,
-    require: [true, 'Specify a user role']
+    required: [true, 'Specify a user role']
   },
   token: {
     type: String,

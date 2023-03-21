@@ -38,7 +38,7 @@ const getjobsByID = async (req, res) => {
     const employerId = req.query.id;
     const vacancies = await jobModel.find({
       employerID: employerId,
-      isApproved: true,
+
     });
     res.json({ data: vacancies, success: true });
   } catch (error) {
@@ -50,16 +50,68 @@ const removeJob = async (req, res) => {
   try {
     const flagged_id = req.query.id;
     const flaggedJob = await jobModel.findByIdAndRemove(flagged_id);
+    if (flaggedJob) {
+      res.json({
+        message: "Job vacancy has been removed successfully! ",
+        success: true
+      });
+    } else {
+      res.json({
+        message: "Job not Found", success: false
+      })
+    }
 
-    res.json({
-      data: flaggedJob,
-      message: "Job vacancy has been removed successfully! ",
-    });
+
   } catch (error) {
     console.log(error);
-    res.json({ message: error.message });
+    res.json({ message: error, success: false });
   }
 };
+const editJob = async (req, res) => {
+  try {
+    const {
+      employerID,
+      _id,
+      title,
+      company,
+      location,
+      salary,
+      description,
+      jobType,
+      skillsRequired, Experience, responsibility, qualifications, benifits, contactEmail, jobTiming, vacancy
+    } = req.body
+
+    const existingUser = await employerModel.findById(employerID);
+    const existingJob = await jobModel.findById(_id)
+    if (existingUser && existingJob) {
+
+      const jobExists = await jobModel.findByIdAndUpdate(_id, {
+        title: title,
+        company: company,
+        location: location,
+        salary: salary,
+        description: description,
+        jobType: jobType,
+        skillsRequired: skillsRequired,
+        Experience: Experience,
+        responsibility: responsibility,
+        qualifications: qualifications,
+        benifits: benifits,
+        contactEmail: contactEmail,
+        jobTiming: jobTiming,
+        vacancy: vacancy
+      })
+      res.json({ data: jobExists, success: true, message: "Job details Updated" })
+    } else {
+      res.json({ message: "Employer Not Found", success: false })
+    }
+
+
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error, success: false });
+  }
+}
 const addJob = async (req, res) => {
   const {
     employerID,
@@ -72,13 +124,8 @@ const addJob = async (req, res) => {
     skillsRequired, Experience, responsibility, qualifications, benifits, contactEmail, jobTiming, vacancy
 
   } = req.body;
-
-
   try {
     const existingUser = await employerModel.findById(employerID);
-
-
-
     if (existingUser && existingUser.verified) {
       const jobVacancy = await jobModel.create({
         title: title,
@@ -100,10 +147,7 @@ const addJob = async (req, res) => {
         vacancy: vacancy
       });
 
-      // const token = jwt.sign(
-      //   { employerID: jobVacancy.employerID, id: jobVacancy._id },
-      //   SERCRET_KEY
-      // );
+
       res.json({
         data: jobVacancy,
         success: true,
@@ -191,5 +235,6 @@ module.exports = {
   removeJob,
   jobBookmarks,
   getSavedJobs,
-  getJobDetailsbyID
+  getJobDetailsbyID,
+  editJob
 };

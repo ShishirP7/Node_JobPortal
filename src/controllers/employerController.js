@@ -5,6 +5,8 @@ const { create } = require("../models/employer_Model");
 const job_Models = require("../models/job_Models");
 const { signupSuccessEmail } = require("../services/mailerService");
 const { getUserModel } = require("../utils/getuserModel");
+const JobApplicant = require("../models/JobApplicant");
+const JobSeeker = require("../models/SeekerModels/jobSeeker_Model");
 const SERCRET_KEY = "JOBPortal";
 
 
@@ -44,7 +46,89 @@ const reset = async (req, res) => {
     console.log(error);
     res.json({ message: error.message, success: false });
   }
+}; const getApplicantByID = async (req, res) => {
+  try {
+    const jobID = req.query.id;
+    const jobApplicants = await JobApplicant.find({
+      $and: [
+        { job_id: jobID },
+        {
+          $or: [
+            { isSelected: { $exists: false } },
+            { isSelected: false }
+          ]
+        }
+      ]
+    });
+    if (jobApplicants && jobApplicants.length > 0) {
+      const applicantDetails = await Promise.all(jobApplicants.map(async (applicant) => {
+        const jobSeekerDetail = await JobSeeker.findOne({ _id: applicant.user_id });
+        if (jobSeekerDetail) {
+          return { ...applicant.toObject(), seekerDetail: jobSeekerDetail.toObject() };
+        } else {
+          return { ...applicant.toObject(), seekerDetail: null };
+        }
+      }));
+      res.json({ data: applicantDetails, message: "Applicant details by job ID", success: true });
+    } else {
+      res.json({ message: "No job applicants found by this job ID", success: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error", success: false });
+  }
 };
+
+// const acceptApplicant = async (req, res) => {
+//   try {
+//     const { id } = req.body;
+//     const existingApplicant = await JobApplicant.findOneAndUpdate({ _id: id }, { isSelected: true });
+
+//     if (existingApplicant) {
+//       res.json({ message: "Applicant Accepted", success: true });
+//     } else {
+//       res.status(404).json({ message: "Applicant not found or already accepted", success: false });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Internal server error", success: false });
+//   }
+// };
+
+
+
+const acceptApplicant = async (req, res) => {
+  const flagged_id = req.query.id;
+  try {
+
+    const existingApplicant = await JobApplicant.findOneAndUpdate({ _id: flagged_id }, { isSelected: true })
+    if (existingApplicant) {
+      res.json({ message: "Applicant Accepted ", success: true })
+    } else {
+      res.json({ message: "Applicant ID invalid", success: false })
+    }
+
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+
+  }
+}
+
+const rejectApplicant = async (req, res) => {
+  const flagged_id = req.query.id;
+  try {
+
+    const existingApplicant = await JobApplicant.findByIdAndRemove(flagged_id)
+    if (existingApplicant) {
+      res.json({ message: "Applicant removed ", success: true })
+    } else {
+      res.json({ message: "Applicant ID invalid", success: false })
+    }
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+
+  }
+}
 
 const changeJobType = async (req, res) => {
   try {
@@ -70,4 +154,4 @@ const changeJobType = async (req, res) => {
 
 
 }
-module.exports = { reset, changeJobType };
+module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant };

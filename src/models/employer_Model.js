@@ -24,9 +24,35 @@ const employerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  companyLocation: {
+    type: String,
+    default: ""
+
+  },
+  designation: {
+    type: String,
+    default: ""
+  },
+  companyDescription: {
+    type: String,
+    default: ""
+
+  },
+  userPhoto: {
+    type: String,
+    default: ""
+  },
+  companyPhoto: {
+    type: String,
+    default: ""
+  },
   role: {
     type: String,
     require: [true, 'Specify a user role']
+  },
+  companyName: {
+    type: String,
+    default: ""
   },
   phoneNumber: {
     type: Number,
@@ -36,9 +62,13 @@ const employerSchema = new mongoose.Schema({
   },
   address: {
     type: String,
+    default: ""
+
   },
   website: {
     type: String,
+    default: ""
+
   },
   date: {
     type: Date,
