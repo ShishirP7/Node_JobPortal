@@ -38,10 +38,11 @@ const signUpSeeker = async (req, res) => {
             const createdUser = await JobSeeker.create({
                 name: name,
                 email: email,
-                password: hasedPassword,
-                phoneNumber: phoneNumber,
+                password: hasedPassword ?? "",
+                phoneNumber: phoneNumber ?? "",
                 role: role
             });
+
             signupSuccessEmail(createdUser, message = `Hello ${createdUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
             res.status(201).json({ data: createdUser, success: true });
 
@@ -65,8 +66,8 @@ const signUpEmployer = async (req, res) => {
             const createdUser = await Employer.create({
                 name: name,
                 email: email,
-                password: hasedPassword,
-                phoneNumber: phoneNumber,
+                password: hasedPassword ?? "",
+                phoneNumber: phoneNumber ?? "",
                 verified: false,
                 role: role
             });

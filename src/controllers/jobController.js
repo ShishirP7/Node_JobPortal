@@ -171,8 +171,12 @@ const addJob = async (req, res) => {
 const jobBookmarks = async (req, res) => {
   try {
     const { jobid, seekerid } = req.body;
+    console.log(jobid, seekerid)
     const checkJobID = await jobModel.findById(jobid);
     const checkSeekerID = await jobSeekerModel.findById(seekerid);
+    console.log(checkSeekerID, "asda")
+
+
     if (checkJobID && checkSeekerID) {
       const DuplicateSavedItem = await SavedJobs.find({
         job_id: jobid,
@@ -194,7 +198,7 @@ const jobBookmarks = async (req, res) => {
       } else {
         const BookedJob = await SavedJobs.create({
           job_id: jobid,
-          seeker_id: "63fdce04f088a1c023aab9e3",
+          seeker_id: seekerid,
         })
         res.json({
           data: BookedJob,

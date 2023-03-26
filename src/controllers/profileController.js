@@ -90,32 +90,20 @@ const editProfileController = async (req, res) => {
 
 
 const setupSeekerProfile = async (req, res) => {
-  const { id,title, resume, address, profileimg, interests, education, skills, trainings, experience, social } = req.body
+  const { id, title, resume, address, profileimg, interests, education, skills, trainings, experience, social } = req.body;
   try {
-    const User = await JobSeeker.findById(id)
-    if (User) {
-      const User = await seekerModel.findByIdAndUpdate(id, {
-        resume: resume,
-        address: address,
-        profileimg: profileimg,
-        interests: interests,
-        education: education,
-        skills: skills,
-        trainings: trainings,
-        experience: experience,
-        social: social,
-        title:title
-      });
-      res.json({ data: User, success: true, message: "User Profile Setup Successfully" })
+    const updatedUser = await JobSeeker.findByIdAndUpdate(id, {
+      ...req.body
+    }, { new: true });
+    if (updatedUser) {
+      res.json({ data: updatedUser, success: true, message: "User Profile Updated Successfully" });
     } else {
-      res.json({ error: "User Not Found ", success: false })
+      res.json({ error: "User Not Found", success: false });
     }
   } catch (error) {
-    res.json({ error: error.message, success: false })
-
+    res.json({ error: error.message, success: false });
   }
-}
-
+};
 
 const setupEmployerProfile = async (req, res) => {
   const { id, companyLocation, userPhoto, companyPhoto, companyDescription, companyName, email, name, phoneNumber, website } = req.body
@@ -131,7 +119,7 @@ const setupEmployerProfile = async (req, res) => {
         name: name,
         phoneNumber: phoneNumber,
         website: website,
-        userPhoto: userPhoto, 
+        userPhoto: userPhoto,
         companyPhoto: companyPhoto
       });
       res.json({ data: User, success: true, message: "Profile successfully updated" })

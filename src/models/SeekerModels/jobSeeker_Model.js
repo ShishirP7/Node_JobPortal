@@ -7,6 +7,7 @@ const jobSeekerSchema = new mongoose.Schema({
     maxLength: [50, "Name cannot exceed 50 characters"],
     required: [true, "Seeker Name is Required"],
   },
+
   email: {
     type: String,
     match: [
@@ -17,12 +18,11 @@ const jobSeekerSchema = new mongoose.Schema({
   },
   title: {
     type: String,
-    required: true,
+
     default: ""
   },
   password: {
     type: String,
-    required: true,
   },
   role: {
     type: String,
@@ -30,6 +30,10 @@ const jobSeekerSchema = new mongoose.Schema({
   },
   token: {
     type: String,
+  },
+  isVerified: {
+    type: Boolean,
+    default: false
   },
 
   resume: {
@@ -39,9 +43,11 @@ const jobSeekerSchema = new mongoose.Schema({
 
   phoneNumber: {
     type: String,
-    match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
-    required: [true, "Phone Number is Required"],
-    unique: [true, "Phone number must be unique"],
+    // match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
+    // required: [true, "Phone Number is Required"],
+    // unique: [true, "Phone number must be unique"],
+    unique: [false]
+
   },
   address: {
     type: String,
@@ -54,75 +60,39 @@ const jobSeekerSchema = new mongoose.Schema({
     default: ""
 
   },
+
+  date: {
+    type: Date,
+    default: Date.now
+  },
   interests: {
-    type: [String]
-
-  },
-  education: [
-    {
-      school: {
-        type: String,
-        required: true
-      },
-      degree: {
-        type: String,
-        required: true
-      },
-      fieldOfStudy: {
-        type: String,
-        required: true
-      },
-      from: {
-        type: Date,
-        required: true
-      },
-      to: {
-        type: Date
-      },
-      current: {
-        type: Boolean,
-        default: false
-      },
-      description: {
-        type: String
-      }
+    type: Array,
+    of: {
+      interest: String
     }
-  ],
+  },
+  education: {
+    type: Array,
+    of: {
+      degree: String,
+      institute: String
+    }
+  },
   skills: {
-    type: [String]
+    type: Array,
+    of: new mongoose.Schema({
+      skill: { type: String },
+    }, { _id: false }),
   },
-  trainings: [
-    {
-      title: {
-        type: String,
-        required: true
-      },
-      organization: {
-        type: String,
-        required: true
-      },
-      location: {
-        type: String
-      },
-      certificate: {
-        type: String
-      },
-      description: {
-        type: String
-      }
+  trainings: {
+    type: Array,
+    of: {
+      trainingTitle: String,
+      organization: String
     }
-  ],
+  },
   social: {
-    website: {
-      type: String,
-      default: ""
-
-    },
-    twitter: {
-      type: String,
-      default: ""
-    },
-    linkedin: {
+    websiteLink: {
       type: String,
       default: ""
     },
@@ -130,49 +100,23 @@ const jobSeekerSchema = new mongoose.Schema({
       type: String,
       default: ""
     },
-    github: {
+    insta: {
       type: String,
       default: ""
     },
-    instagram: {
+    linkedin: {
       type: String,
       default: ""
     },
 
   },
-  date: {
-    type: Date,
-    default: Date.now
-  },
-  experience: [
-    {
-      title: {
-        type: String,
-        required: true
-      },
-      company: {
-        type: String,
-        required: true
-      },
-      location: {
-        type: String
-      },
-      from: {
-        type: Date,
-        required: true
-      },
-      to: {
-        type: Date
-      },
-      current: {
-        type: Boolean,
-        default: false
-      },
-      description: {
-        type: String
-      }
+  experience: {
+    type: Array,
+    of: {
+      experienceTitle: String,
+      experienceOrganization: String
     }
-  ],
+  }
 });
 
 const JobSeeker = mongoose.model("JobSeeker", jobSeekerSchema);

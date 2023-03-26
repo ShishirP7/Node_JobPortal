@@ -20,4 +20,19 @@ const signupSuccessEmail = async (email, subject, text) => {
         }
     });
 }
-module.exports = { signupSuccessEmail };
+const resetPasswordEmail = async (email, subject, text) => {
+    const mail = {
+        from: "sishirpaudel7@gmail.com",
+        to: email,
+        subject: subject,
+        text: text
+    }
+    return mailer.sendMail(mail, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log("Email sent successfully");
+        }
+    });
+}
+module.exports = { signupSuccessEmail, resetPasswordEmail };

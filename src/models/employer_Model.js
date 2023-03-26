@@ -18,11 +18,11 @@ const employerSchema = new mongoose.Schema({
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       "Please provide a valid email",
     ],
-    unique: [true, "The email cannot be duplicate"],
+    unique: [true, "This email already exists"],
   },
   password: {
     type: String,
-    required: true,
+    // required: true,
   },
   companyLocation: {
     type: String,
@@ -56,9 +56,10 @@ const employerSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: Number,
-    match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
-    required: [true, "Phone Number is Required"],
-    unique: [true, "Phone number must be unique"],
+    // match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
+    // required: [true, "Phone Number is Required"],
+    // unique: [true, "Phone number must be unique"],
+    unique: [false]
   },
   address: {
     type: String,

@@ -3,50 +3,146 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { create } = require("../models/employer_Model");
 const job_Models = require("../models/job_Models");
-const { signupSuccessEmail } = require("../services/mailerService");
+const { signupSuccessEmail, resetPasswordEmail } = require("../services/mailerService");
 const { getUserModel } = require("../utils/getuserModel");
 const JobApplicant = require("../models/JobApplicant");
 const JobSeeker = require("../models/SeekerModels/jobSeeker_Model");
+const OTP_MODAL = require("../models/Otp_Model");
 const SERCRET_KEY = "JOBPortal";
 
 
-const reset = async (req, res) => {
-  const { email, password, newpassword } = req.body;
+const forgetPassword = async (req, res) => {
+  try {
+    const { email, otp, newpassword } = req.body;
+
+    const data = await OTP_MODAL.findOne({ email: email, code: otp })
+    if (!data) {
+      return res.json({ message: "Invalid OTP", success: false });
+    }
+
+    const currentTime = new Date().getTime();
+    if (data.expireIn < currentTime) {
+      return res.json({ message: "Token Expired", success: false });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+    const user = await employerModel.findOneAndUpdate({ email: email }, { password: hashedPassword })
+    if (!user) {
+      return res.json({ message: "User not found", success: false });
+    }
+
+    return res.json({ message: "Password Reset Successful", success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error", success: false });
+  }
+}
+
+const sendEmail = async (req, res) => {
+  const { email } = req.body;
 
   try {
     const existingUser = await employerModel.findOne({ email: email });
-    const authorizedUser = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    if (existingUser) {
+      const code = Math.floor(Math.random() * 1000000);
+      const OTPDatas = new OTP_MODAL({
+        email: email,
+        code: code,
+        expireIn: new Date().getTime() + 300 * 1000
+      })
+      const OTPResponse = await OTPDatas.save();
+      const text = `Your verification code is ${code}. Please enter this code to reset your password.`;
+      const mail = {
+        from: "sishirpaudel7@gmail.com",
+        to: email,
+        subject: "Reset Password - Verification Code",
+        text: text
+      };
 
-    if (authorizedUser && existingUser) {
-      const hasedPassword = await bcrypt.hash(newpassword, 10);
-      await employerModel.findOneAndUpdate(
-        { email: email },
-        {
-          $set: {
-            password: hasedPassword,
-          },
-        }
-      );
-      res.json({ success: true, message: "Updated Succeessfully" });
-    }
-    if (!authorizedUser) {
-      return res.json({
-        message: "Provided Password Is Incorrect", success: false
+      await resetPasswordEmail(email, mail.subject, mail.text);
+
+      res.json({
+        success: true,
+        message: "Verification code sent successfully"
       });
     }
+
+    else {
+      return res.json({
+        message: "User not found",
+        success: false
+      });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.json({
+      message: error.message,
+      success: false
+    });
+  }
+};
+
+
+const reset = async (req, res) => {
+  const { id, password, newpassword, confirmpassword } = req.body;
+
+  try {
+    const existingUser = await employerModel.findById(id);
+
     if (!existingUser) {
       return res.json({
-        message: "Email not found", success: false
+        message: "User not found",
+        success: false
       });
     }
+
+    const authorizedUser = await bcrypt.compare(password, existingUser.password);
+
+    if (!authorizedUser) {
+      return res.json({
+        message: "Incorrect password",
+        success: false
+      });
+    }
+
+    if (newpassword !== confirmpassword) {
+      return res.json({
+        message: "New passwords do not match",
+        success: false
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+
+    // Update the password in the database
+    await employerModel.findByIdAndUpdate(id, { password: hashedPassword });
+
+    // Verify the updated password
+    const updatedUser = await employerModel.findById(id);
+    const isPasswordCorrect = await bcrypt.compare(newpassword, updatedUser.password);
+
+    if (!isPasswordCorrect) {
+      return res.json({
+        message: "Error: Password update unsuccessful",
+        success: false
+      });
+    }
+    resetPasswordEmail(updatedUser.email, subject = `Hello ${updatedUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ message: error.message, success: false });
+    console.error(error);
+    res.json({
+      message: error.message,
+      success: false
+    });
   }
-}; const getApplicantByID = async (req, res) => {
+};
+
+const getApplicantByID = async (req, res) => {
   try {
     const jobID = req.query.id;
     const jobApplicants = await JobApplicant.find({
@@ -78,22 +174,6 @@ const reset = async (req, res) => {
     res.status(500).json({ message: "Internal server error", success: false });
   }
 };
-
-// const acceptApplicant = async (req, res) => {
-//   try {
-//     const { id } = req.body;
-//     const existingApplicant = await JobApplicant.findOneAndUpdate({ _id: id }, { isSelected: true });
-
-//     if (existingApplicant) {
-//       res.json({ message: "Applicant Accepted", success: true });
-//     } else {
-//       res.status(404).json({ message: "Applicant not found or already accepted", success: false });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Internal server error", success: false });
-//   }
-// };
 
 
 
@@ -154,4 +234,4 @@ const changeJobType = async (req, res) => {
 
 
 }
-module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant };
+module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword };
