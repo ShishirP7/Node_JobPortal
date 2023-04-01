@@ -7,6 +7,10 @@ const jobSeekerSchema = new mongoose.Schema({
     maxLength: [50, "Name cannot exceed 50 characters"],
     required: [true, "Seeker Name is Required"],
   },
+  about: {
+    type: String,
+    default: ""
+  },
 
   email: {
     type: String,
@@ -57,7 +61,7 @@ const jobSeekerSchema = new mongoose.Schema({
   },
   profileimg: {
     type: String,
-    default: ""
+    default: "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-photo-183042379.jpg"
 
   },
 
@@ -108,6 +112,10 @@ const jobSeekerSchema = new mongoose.Schema({
       type: String,
       default: ""
     },
+    github: {
+      type: String,
+      default: ""
+    }
 
   },
   experience: {

@@ -23,12 +23,7 @@ const AdminSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phoneNumber: {
-    type: Number,
-    match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
-    required: [true, "Phone Number is Required"],
-    unique: [true, "Phone number must be unique"],
-  },
+ 
 });
 
 module.exports = Admin = mongoose.model("admin", AdminSchema);

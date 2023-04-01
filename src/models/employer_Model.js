@@ -40,11 +40,9 @@ const employerSchema = new mongoose.Schema({
   },
   userPhoto: {
     type: String,
-    default: ""
   },
   companyPhoto: {
     type: String,
-    default: ""
   },
   role: {
     type: String,
@@ -56,9 +54,7 @@ const employerSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: Number,
-    // match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
-    // required: [true, "Phone Number is Required"],
-    // unique: [true, "Phone number must be unique"],
+
     unique: [false]
   },
   address: {

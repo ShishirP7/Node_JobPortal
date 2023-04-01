@@ -7,6 +7,7 @@ const jobs = require("./jobs.router");
 const { signUpController } = require("../controllers/LoginSignUp/signUpController");
 const { loginController } = require("../controllers/LoginSignUp/loginController");
 const { profileController, editProfileController } = require("../controllers/profileController");
+const uploader = require("../middlewares/imageUploader");
 
 router.all("/", (req, res) => {
   res.send(" Hello !!");
@@ -16,7 +17,7 @@ router.use("/admin", admin);
 router.use("/jobseeker", jobseekers);
 router.use("/employer", employer);
 router.use("/getProfile", profileController);
-router.use("/editProfile", editProfileController);
+router.post("/editProfile", editProfileController);
 router.use("/job", jobs);
 router.use("/authentication/login", loginController)
 router.use("/authentication/signUp", signUpController)

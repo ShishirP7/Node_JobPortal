@@ -16,19 +16,15 @@ const ApplicantSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  resume: {
-    type: String,
-    required: true,
-  },
 
-  about: {
-    type: String,
-    required: true,
-
-  },
   isSelected: {
     type: Boolean,
     default: false,
+  },
+  appliedDate: {
+    type: Date,
+    default: Date.now,
+    required: true
   }
 });
 

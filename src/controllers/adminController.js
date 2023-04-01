@@ -99,6 +99,41 @@ const reset = async (req, res) => {
   }
 };
 
+
+
+const getAllEmployers = async (req, res) => {
+  try {
+    const employersList = await employerModel.find({})
+    res.json({ data: employersList, message: "All employers Lists", success: true })
+
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+
+  }
+}
+const getVerifiedEmployers = async (req, res) => {
+  try {
+    const employersList = await employerModel.find({ verified: true })
+    res.json({ data: employersList, message: "Verified employers Lists", success: true })
+
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+
+  }
+}
+const getNonVerifiedEmployers = async (req, res) => {
+  try {
+    const employersList = await employerModel.find({ verified: false })
+    res.json({ data: employersList, message: "Pending employers Lists", success: true })
+
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+
+  }
+}
+
+
+
 const deleteEmployer = async (req, res) => {
   const employer_id = req.query.id;
   const employer = await employerModel.findByIdAndDelete(employer_id)
@@ -146,22 +181,43 @@ const approveEmployer = async (req, res) => {
   }
 }
 
+const rejectJob = async (req, res) => {
+  try {
+
+
+  } catch (error) {
+    res.json({ message: error.message, success: false });
+
+  }
+}
+
+
+
+
 const approveJob = async (req, res) => {
   try {
     const job_id = req.query.id;
 
     const flaggedJob = await jobModel.findById(job_id);
     if (flaggedJob) {
-      await jobModel.findByIdAndUpdate(job_id, {
-        $set: {
-          isApproved: true,
-        },
-      });
-      res.json({
-        success: true,
-        message: "Updated Succeessfully",
-        data: flaggedJob,
-      });
+      if (flaggedJob.isApproved === true) {
+        res.json({
+          success: true,
+          message: "Job is already Approved",
+        });
+      } else {
+        await jobModel.findByIdAndUpdate(job_id, {
+          $set: {
+            isApproved: true,
+          },
+        });
+        res.json({
+          success: true,
+          message: "Updated Succeessfully",
+        });
+      }
+
+
     } else {
       res.json({ message: "Job ID was not found ", success: false })
     }
@@ -171,4 +227,6 @@ const approveJob = async (req, res) => {
   }
 };
 
-module.exports = { signUp, login, reset, deleteEmployer, approveJob, approveEmployer };
+
+
+module.exports = { signUp, login, reset, deleteEmployer, approveJob, approveEmployer, getAllEmployers, getNonVerifiedEmployers, getVerifiedEmployers };

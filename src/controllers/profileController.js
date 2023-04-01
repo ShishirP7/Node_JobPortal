@@ -28,13 +28,12 @@ const profileController = async (req, res) => {
 
 const getSeekerProfile = async (req, res) => {
   try {
-    const { role, id } = req.body
+    const { id } = req.body
     const existingUser = await JobSeeker.findById(id)
     if (!existingUser) {
       res.json({ success: false, data: null, message: "User id is not valid" })
     } else {
       res.json({ data: existingUser, success: true, message: "Job Seekers Details fetch Successful" })
-
     }
 
   } catch (error) {
@@ -43,6 +42,7 @@ const getSeekerProfile = async (req, res) => {
   }
 
 }
+
 
 const getEmployerProfile = async (req, res) => {
   try {
@@ -62,10 +62,6 @@ const getEmployerProfile = async (req, res) => {
 
 }
 
-
-
-
-
 const editProfileController = async (req, res) => {
   const { role } = req.body;
   try {
@@ -78,19 +74,17 @@ const editProfileController = async (req, res) => {
         break;
       default:
         res.json({ success: false, data: null, message: "Role invalid" })
-
-
     }
 
   } catch (error) {
     console.log(error);
-    res.json({ message: error.message });
+    res.json({ message: error.message, success: false });
   }
 }
 
 
 const setupSeekerProfile = async (req, res) => {
-  const { id, title, resume, address, profileimg, interests, education, skills, trainings, experience, social } = req.body;
+  const { id } = req.body;
   try {
     const updatedUser = await JobSeeker.findByIdAndUpdate(id, {
       ...req.body
@@ -104,6 +98,8 @@ const setupSeekerProfile = async (req, res) => {
     res.json({ error: error.message, success: false });
   }
 };
+
+
 
 const setupEmployerProfile = async (req, res) => {
   const { id, companyLocation, userPhoto, companyPhoto, companyDescription, companyName, email, name, phoneNumber, website } = req.body

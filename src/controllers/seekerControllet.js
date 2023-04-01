@@ -89,10 +89,6 @@ const resetPassword = async (req, res) => {
 
     const user = await seekerModel.findById(req.query.id);
     res.send({ data: user, message: "helo" })
-    // const { userId, token } = req.query
-
-    // const User = await seekerModel.findById(userId);
-    // res.send(User)
 
 
   } catch (error) {
@@ -129,28 +125,32 @@ const editProfile = async (req, res) => {
 }
 
 const apply = async (req, res) => {
-  const { user_id, job_id, about, resume } = req.body
+  const { user_id, job_id } = req.body
   try {
     const UserExists = await seekerModel.findById(user_id)
     const JobExists = await job_Models.findById(job_id)
     if (UserExists && JobExists) {
-      const newApplicant = await JobApplicant.create({
-        job_id: job_id,
-        user_id: user_id,
-        about: about,
-        resume: resume
-      });
-      res.json({ message: "Application Successful", success: true, data: newApplicant })
+
+      const isApplied = await JobApplicant.findOne({ job_id: JobExists._id, user_id: UserExists._id })
+      if (!isApplied) {
+        const newApplicant = await JobApplicant.create({
+          job_id: job_id,
+          user_id: user_id,
+          // about: about,
+          // resume: resume
+        });
+        res.json({ message: "Application Successful", success: true, data: newApplicant })
+      } else {
+        res.json({ message: "Already Applied", success: true })
+      }
+
     }
     if (!UserExists) {
-      res.json({ message: "USER NOT EXISTS" })
+      res.json({ message: "USER NOT EXISTS", success: false })
     }
     if (!JobExists) {
-      res.json({ message: "JOB DOESNT EXISTS" })
+      res.json({ message: "JOB DOESNT EXISTS", success: false })
     }
-
-
-
   } catch (error) {
     res.json({ error: error.message, status: false })
   }
