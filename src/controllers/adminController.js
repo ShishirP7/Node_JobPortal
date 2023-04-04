@@ -3,7 +3,8 @@ const jobModel = require("../models/job_Models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const employerModel = require("../models/employer_Model");
-const { signupSuccessEmail } = require("../services/mailerService");
+const { signupSuccessEmail, resetPasswordEmail } = require("../services/mailerService");
+const admin_Model = require("../models/admin_Model");
 const SERCRET_KEY = "JOBPortal";
 
 const signUp = async (req, res) => {
@@ -60,45 +61,63 @@ const login = async (req, res) => {
     res.json({ message: error.message, success: false });
   }
 };
-
-const reset = async (req, res) => {
-  const { email, password, newpassword } = req.body;
+const passwordReset = async (req, res) => {
+  const { id, password, newpassword, confirmpassword } = req.body;
 
   try {
-    const existingUser = await adminModel.findOne({ email: email });
-    const authorizedUser = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    const existingUser = await adminModel.findById(id);
 
-    if (authorizedUser && existingUser) {
-      const hasedPassword = await bcrypt.hash(newpassword, 10);
-      await adminModel.findOneAndUpdate(
-        { email: email },
-        {
-          $set: {
-            password: hasedPassword,
-          },
-        }
-      );
-      res.json({ success: true, message: "Updated Succeessfully" });
-    }
-    if (!authorizedUser) {
-      return res.json({
-        message: "Provided Password Is Incorrect", success: false
-      });
-    }
     if (!existingUser) {
       return res.json({
-        message: "Email not found", success: false
+        message: "User not found",
+        success: false
       });
     }
+
+    const authorizedUser = await bcrypt.compare(password, existingUser.password);
+
+    if (!authorizedUser) {
+      return res.json({
+        message: "Incorrect password",
+        success: false
+      });
+    }
+
+    if (newpassword !== confirmpassword) {
+      return res.json({
+        message: "New passwords do not match",
+        success: false
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+
+    // Update the password in the database
+    await adminModel.findByIdAndUpdate(id, { password: hashedPassword });
+
+    // Verify the updated password
+    const updatedUser = await adminModel.findById(id);
+    const isPasswordCorrect = await bcrypt.compare(newpassword, updatedUser.password);
+
+    if (!isPasswordCorrect) {
+      return res.json({
+        message: "Error: Password update unsuccessful",
+        success: false
+      });
+    }
+    resetPasswordEmail(updatedUser.email, subject = `Hello ${updatedUser.name}, Your account has been reset successfully. `)
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ message: error.message, success: false });
+    console.error(error);
+    res.json({
+      message: error.message,
+      success: false
+    });
   }
 };
-
 
 
 const getAllEmployers = async (req, res) => {
@@ -229,4 +248,4 @@ const approveJob = async (req, res) => {
 
 
 
-module.exports = { signUp, login, reset, deleteEmployer, approveJob, approveEmployer, getAllEmployers, getNonVerifiedEmployers, getVerifiedEmployers };
+module.exports = { signUp, login, passwordReset, deleteEmployer, approveJob, approveEmployer, getAllEmployers, getNonVerifiedEmployers, getVerifiedEmployers };

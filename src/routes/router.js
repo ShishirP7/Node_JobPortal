@@ -7,12 +7,10 @@ const jobs = require("./jobs.router");
 const { signUpController } = require("../controllers/LoginSignUp/signUpController");
 const { loginController } = require("../controllers/LoginSignUp/loginController");
 const { profileController, editProfileController } = require("../controllers/profileController");
-const uploader = require("../middlewares/imageUploader");
 
 router.all("/", (req, res) => {
   res.send(" Hello !!");
 });
-// router.use("/jobs", jobs);
 router.use("/admin", admin);
 router.use("/jobseeker", jobseekers);
 router.use("/employer", employer);

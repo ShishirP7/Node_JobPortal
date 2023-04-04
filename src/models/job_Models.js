@@ -16,6 +16,10 @@ const JobSchema = new Schema({
     type: Number,
     default: 0 //["normal","hot","premium" ,"featured"]
   },
+  jobPhoto: {
+    type: String,
+    default: "https://png.pngtree.com/png-vector/20190801/ourmid/pngtree-job-bag-icon-png-image_1645012.jpg"
+  },
   title: {
     type: String,
     required: true,
@@ -72,7 +76,7 @@ const JobSchema = new Schema({
     default: Date.now,
   },
 
-  
+
 
 });
 

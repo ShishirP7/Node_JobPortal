@@ -102,12 +102,11 @@ const setupSeekerProfile = async (req, res) => {
 
 
 const setupEmployerProfile = async (req, res) => {
-  const { id, companyLocation, userPhoto, companyPhoto, companyDescription, companyName, email, name, phoneNumber, website } = req.body
+  const { id, companyLocation, userPhoto, companyPhoto, companyDescription, companyName, email, name, phoneNumber, website, verified } = req.body
   try {
     const User = await Employer.findById(id)
     if (User) {
       const User = await Employer.findByIdAndUpdate(id, {
-
         companyLocation: companyLocation,
         companyDescription: companyDescription,
         companyName: companyName,
@@ -116,7 +115,8 @@ const setupEmployerProfile = async (req, res) => {
         phoneNumber: phoneNumber,
         website: website,
         userPhoto: userPhoto,
-        companyPhoto: companyPhoto
+        companyPhoto: companyPhoto,
+        verified: verified
       });
       res.json({ data: User, success: true, message: "Profile successfully updated" })
     } else {

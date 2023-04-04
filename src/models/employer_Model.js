@@ -40,9 +40,12 @@ const employerSchema = new mongoose.Schema({
   },
   userPhoto: {
     type: String,
+    default:"https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
+
   },
   companyPhoto: {
     type: String,
+    default:"https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
   },
   role: {
     type: String,

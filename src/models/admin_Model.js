@@ -15,15 +15,24 @@ const AdminSchema = new mongoose.Schema({
     ],
     unique: [true, "The email cannot be duplicate"],
   },
+  phoneNumber: {
+    type: String,
+    // match: [/^(\d{7})|(\d{10})$/, "Please provide a valid contact number"],
+    // required: [true, "Phone Number is Required"],
+    // unique: [true, "Phone number must be unique"],
+    unique: [false]
+
+
+  },
   role: {
-    type: Number,
+    type: String,
     require: [true, 'Specify a user role']
   },
   password: {
     type: String,
     required: true,
   },
- 
+
 });
 
 module.exports = Admin = mongoose.model("admin", AdminSchema);

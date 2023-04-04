@@ -15,7 +15,17 @@ const {
   approveCategoryChange,
   getCategoryRequest,
   getCategoryHistory,
-  rejectCategoryChange
+  rejectCategoryChange,
+  getCompanynLocation,
+  getRecentApplicants,
+  getMostAppliedJob,
+  JobsApplicantCount,
+  getEmployerStats,
+  getJobCategoryCount,
+  getApplicantCountByCategory,
+  getPricing,
+  getEmployerProfileCompletion,
+  getProfilePercent
 } = require("../controllers/jobController");
 
 
@@ -32,11 +42,32 @@ jobsRouter.get("/getSavedJobs", getSavedJobs);
 jobsRouter.get("/getAppliedJobs", getAppliedJobs);
 jobsRouter.get("/getJobDetailsbyID", getJobDetailsbyID);
 jobsRouter.get("/getJobsbyKeywords", getJobsbyKeywords);
-jobsRouter.get("/getfilteredData", getfilteredData);
+jobsRouter.post("/getfilteredData", getfilteredData);
 jobsRouter.post("/requestCategoryChange", requestCategoryChange);
 jobsRouter.post("/approveCategoryChange", approveCategoryChange);
 jobsRouter.get("/getCategoryRequest", getCategoryRequest);
 jobsRouter.get("/getCategoryHistory", getCategoryHistory);
 jobsRouter.post("/rejectCategoryChange", rejectCategoryChange);
+jobsRouter.get("/getCompanynLocation", getCompanynLocation);
+
+//get Recent applicant
+jobsRouter.get("/getRecentApplicants", getRecentApplicants);
+
+//get 5 top applied jobs //
+jobsRouter.get("/getMostAppliedJob", getMostAppliedJob);
+//get 5 top applied jobs //
+
+
+//get all job application count //
+jobsRouter.get("/getJobsApplicantCount", JobsApplicantCount);
+//get all job application count //
+
+//get all job application count //
+jobsRouter.get("/getEmployerStats", getEmployerStats);
+//get all job application count //
+jobsRouter.get("/getJobCategoryCount", getJobCategoryCount);
+jobsRouter.get("/getApplicantCountByCategory", getApplicantCountByCategory);
+jobsRouter.get("/getPricing", getPricing);
+
 
 module.exports = jobsRouter;

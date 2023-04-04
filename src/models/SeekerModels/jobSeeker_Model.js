@@ -61,7 +61,7 @@ const jobSeekerSchema = new mongoose.Schema({
   },
   profileimg: {
     type: String,
-    default: "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-photo-183042379.jpg"
+    default: ""
 
   },
 

@@ -3,6 +3,7 @@ const JobSeeker = require("../../models/SeekerModels/jobSeeker_Model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { toast } = require("react-toastify");
+const admin_Model = require("../../models/admin_Model");
 const SERCRET_KEY = "JOBPortal";
 
 const loginController = async (req, res) => {
@@ -14,6 +15,9 @@ const loginController = async (req, res) => {
                 break;
             case "1":
                 loginEmployer(req, res);
+                break;
+            case "2":
+                loginAdmin(req, res)
                 break;
             default:
                 res.json({ success: false, data: null, msg: 'Invalid Role' })
@@ -50,7 +54,7 @@ const loginJobSeeker = async (req, res) => {
 
     } catch (error) {
 
-        res.json({ error:    error.message, success: false })
+        res.json({ error: error.message, success: false })
     }
 
 
@@ -84,5 +88,34 @@ const loginEmployer = async (req, res) => {
         res.json({ message: error.message, success: false });
     }
 };
+const loginAdmin = async (req, res) => {
+    const { email, password, role } = req.body;
+
+    try {
+
+        const existingUser = await admin_Model.findOne({ email: email });
+        if (!existingUser) {
+            return res.json({ message: "User Not Found !!", success: false });
+        }
+        const authorizedUser = await bcrypt.compare(
+            password,
+            existingUser.password
+        );
+        if (!authorizedUser) {
+            return res.json({ message: "Credentials Not Valid ", success: false });
+        }
+
+        const token = jwt.sign(
+            { email: existingUser.email, id: existingUser._id, role: role },
+            SERCRET_KEY
+        );
+        res.send({ success: true, data: existingUser, token: token, message: "Login Success" });
+    } catch (error) {
+        console.log(error);
+        res.json({ message: error.message, success: false });
+    }
+};
 
 module.exports = { loginController };
+
+

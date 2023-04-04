@@ -145,17 +145,10 @@ const reset = async (req, res) => {
 const getApplicantByID = async (req, res) => {
   try {
     const jobID = req.query.id;
-    const jobApplicants = await JobApplicant.find({
-      $and: [
-        { job_id: jobID },
-        {
-          $or: [
-            { isSelected: { $exists: false } },
-            { isSelected: false }
-          ]
-        }
-      ]
-    });
+
+
+    const jobApplicants = await JobApplicant.find({ job_id: jobID })
+
     if (jobApplicants && jobApplicants.length > 0) {
       const applicantDetails = await Promise.all(jobApplicants.map(async (applicant) => {
         const jobSeekerDetail = await JobSeeker.findOne({ _id: applicant.user_id });
@@ -181,7 +174,7 @@ const acceptApplicant = async (req, res) => {
   const flagged_id = req.query.id;
   try {
 
-    const existingApplicant = await JobApplicant.findOneAndUpdate({ _id: flagged_id }, { isSelected: true })
+    const existingApplicant = await JobApplicant.findOneAndUpdate({ _id: flagged_id }, { isSelected: true, isActive: false })
     if (existingApplicant) {
       res.json({ message: "Applicant Accepted ", success: true })
     } else {
@@ -197,10 +190,10 @@ const acceptApplicant = async (req, res) => {
 const rejectApplicant = async (req, res) => {
   const flagged_id = req.query.id;
   try {
-
-    const existingApplicant = await JobApplicant.findByIdAndRemove(flagged_id)
+    const existingApplicant = await JobApplicant.findOneAndUpdate(flagged_id, { isSelected: false, isActive: false })
+    console.log(existingApplicant, "applicatn")
     if (existingApplicant) {
-      res.json({ message: "Applicant removed ", success: true })
+      res.json({ message: "Applicant Rejected ", success: true })
     } else {
       res.json({ message: "Applicant ID invalid", success: false })
     }
@@ -233,5 +226,47 @@ const changeJobType = async (req, res) => {
   }
 
 
+
+
+
+
 }
-module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword };
+
+
+
+const getProfilePercent = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const employer = await employerModel.findById(id);
+
+    if (!employer) {
+      return res.status(404).json({ msg: 'Employer not found' });
+    }
+
+    const count = Object.keys(employerModel.schema.paths)
+      .filter(
+        (key) =>
+          !['_id', '__v', 'date', 'verified', 'role', 'userPhoto', 'companyPhoto'].includes(key)
+      )
+      .length;
+
+    let completed = 0;
+
+    for (const [key, value] of Object.entries(employer._doc)) {
+      if (!['_id', '__v', 'date', 'verified', 'role', 'userPhoto', 'companyPhoto'].includes(key)) {
+        if (value && value.trim() !== '') {
+          completed++;
+        }
+      }
+    }
+
+    const completion = Math.floor((completed / count) * 100);
+
+    res.json({ completion });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+
+}
+module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent };
