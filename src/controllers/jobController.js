@@ -312,30 +312,6 @@ const getJobsbyKeywords = async (req, res) => {
   }
 };
 
-// const getfilteredData = async (req, res) => {
-//   const category = req.query.category || 0;
-//   const jobType = req.query.jobType || 0;
-//   const salary = req.query.minSalary || 0;
-
-//   try {
-//     const filters = {};
-//     if (category !== 0) {
-//       filters.category = category;
-//     }
-//     if (jobType !== 0) {
-//       filters.jobType = jobType;
-//     }
-//     filters.salary = { $gte: salary, $lte: salary + 5000 };
-//     console.log('Filters:', filters);
-
-//     const jobs = await jobModel.find(filters);
-
-//     res.json({ data: jobs, message: 'Jobs filtered successfully', success: true });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: error.message });
-//   }
-// };
 
 const getfilteredData = async (req, res) => {
   try {
@@ -419,7 +395,7 @@ const getCategoryHistory = async (req, res) => {
 
 const approveCategoryChange = async (req, res) => {
   try {
-    const { paymentID} = req.body
+    const { paymentID } = req.body
     const flaggedJob = await Payment.findByIdAndUpdate(paymentID, { isActive: false, success: true })
     if (flaggedJob) {
       const categoryUpdate = await jobModel.findOneAndUpdate({ _id: flaggedJob.jobID }, { category: flaggedJob.newCategory })
@@ -752,7 +728,28 @@ const getPricing = async (req, res) => {
 
 
 
+const getJobsbyCategory = async (req, res) => {
+  try {
 
+
+    const category0 = await jobModel.find({ category: 0 });
+    const category1 = await jobModel.find({ category: 1 });
+    const category2 = await jobModel.find({ category: 2 });
+    const category3 = await jobModel.find({ category: 3 });
+
+    res.json({
+      data: {
+        Basic: category0,
+        Hot: category1,
+        Premium: category2,
+        Featured: category3
+      },
+      success: true
+    });
+  } catch (error) {
+    console.log(error)
+  }
+};
 
 
 
@@ -786,5 +783,6 @@ module.exports = {
   getJobCategoryCount,
   getApplicantCountByCategory,
   getPricing,
+  getJobsbyCategory
 
 };

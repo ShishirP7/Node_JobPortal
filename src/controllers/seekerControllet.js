@@ -9,6 +9,7 @@ const { signupSuccessEmail } = require("../services/mailerService");
 const tokenSchema = require("../models/tokenSchema");
 const { sendMail } = require("../config/nodemailer/mailer");
 const Employer = require("../models/employer_Model");
+const JobSeeker = require("../models/SeekerModels/jobSeeker_Model");
 
 
 const reset = async (req, res) => {
@@ -181,5 +182,134 @@ const setupProfile = async (req, res) => {
     res.json({ error: error.message })
 
   }
+
 }
-module.exports = { reset, setupProfile, resetLink, editProfile, apply, resetPassword };
+
+// const getJobRecommendation = async (req, res) => {
+//   const { seekerId } = req.body;
+
+//   try {
+//     // Get the seeker data from the database
+//     const seeker = await seekerModel.findById(seekerId);
+//     if (!seeker) {
+//       return res.status(404).json({ error: 'Seeker not found' });
+//     }
+
+//     // Extract the seeker's experience year value and skills
+//     const experienceYear = seeker.experienceYear;
+//     const skills = seeker.skills.map(skill => skill.skill);
+
+//     // Construct a regular expression to match any words in the job title
+//     const regex = new RegExp(seeker.title.split(' ').join('|'), 'i');
+
+//     // Get up to 5 recommended jobs from the database based on experience year, job title, and skills
+//     const jobs = await job_Models.find({
+//       $or: [
+//         { Experience: experienceYear },
+//         { title: { $regex: regex } },
+//         { skillsRequired: { $in: skills } }
+//       ],
+//     }).limit(5);
+
+//     if (jobs && jobs.length > 0) {
+//       res.json({ data: jobs, success: true, message: "Job recommendation" });
+//     } else {
+//       res.json({ message: "No jobs found", success: false });
+//     }
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+
+
+const getJobRecommendation = async (req, res) => {
+  const { seekerId } = req.body
+
+  try {
+    // Get the seeker data from the database
+    const seeker = await seekerModel.findById(seekerId);
+    if (!seeker) {
+      return res.status(404).json({ error: 'Seeker not found' });
+    }
+
+    // Extract the seeker's experience year value and job title
+    const experienceYear = seeker.experienceYear;
+    const jobTitle = seeker.title;
+
+    // Construct a regular expression to match any words in the job title
+    const regex = new RegExp(jobTitle.split(' ').join('|'), 'i');
+
+    // Get up to 5 recommended jobs from the database based on experience year and job title
+    const jobs = await job_Models.find({
+      $or: [
+        { Experience: experienceYear },
+        { title: { $regex: regex } },
+      ],
+    }).limit(4);
+
+    if (jobs && jobs.length > 0) {
+      res.json({ data: jobs, success: true, message: "Job recommendation" });
+    } else {
+      res.json({ message: "No jobs found", success: false });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+const getRecommendation = async (req, res) => {
+  const { seekerId } = req.body;
+  try {
+    // Find the job seeker by ID
+    const seeker = await JobSeeker.findById(seekerId);
+
+    // Get the seeker's skills as an array of strings
+    const seekerSkills = seeker.skills.map((skill) => skill.skill.toLowerCase());
+
+    console.log('Seeker skills:', seekerSkills);
+
+    // Find jobs with matching skills and populate job details
+    const jobs = await job_Models.find({
+      'skillsRequired.skill': { $in: seekerSkills },
+    }).populate('_id', 'company email')
+
+    console.log('Matching jobs:', jobs);
+
+    // Map the jobs to include only the job ID and the matching skills
+    const recommendedJobs = jobs.map((job) => {
+      const matchingSkills = job.skillsRequired
+        .filter((skill) => seekerSkills.includes(skill.skill.toLowerCase()))
+        .map((skill) => skill.skill);
+      return {
+        id: job._id,
+        matchingSkills,
+        jobDetails: {
+          title: job.title,
+          description: job.description,
+          employer: job.employer,
+          company: job.company,
+          experience: job.Experience
+          , jobPhoto: job.jobPhoto
+        },
+      };
+    });
+    res.json({
+      data: recommendedJobs,
+      success: true,
+      message: "Recommended Jobs"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Server error',
+    });
+  }
+};
+
+
+module.exports = { reset, setupProfile, resetLink, editProfile, apply, resetPassword, getJobRecommendation, getRecommendation };

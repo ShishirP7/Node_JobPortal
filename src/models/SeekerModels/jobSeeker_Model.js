@@ -25,6 +25,10 @@ const jobSeekerSchema = new mongoose.Schema({
 
     default: ""
   },
+  experienceYear: {
+    type: String,
+    default: 0
+  },
   password: {
     type: String,
   },

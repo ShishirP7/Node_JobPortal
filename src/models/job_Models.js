@@ -45,11 +45,17 @@ const JobSchema = new Schema({
     type: String,
     // enum: ["Full-time", "Part-time", "Freelance", "Internship"],
   },
-  skillsRequired: [
-    {
-      type: String,
-    },
-  ],
+  skillsRequired: {
+    type: Array,
+    of: new mongoose.Schema({
+      skill: { type: String },
+    }, { _id: false }),
+  },
+  // skillsRequired: [
+  //   {
+  //     type: String,
+  //   },
+  // ],
   Experience: {
     type: String
   },

@@ -8,6 +8,7 @@ const { getUserModel } = require("../utils/getuserModel");
 const JobApplicant = require("../models/JobApplicant");
 const JobSeeker = require("../models/SeekerModels/jobSeeker_Model");
 const OTP_MODAL = require("../models/Otp_Model");
+const Employer = require("../models/employer_Model");
 const SERCRET_KEY = "JOBPortal";
 
 
@@ -268,5 +269,51 @@ const getProfilePercent = async (req, res) => {
     res.status(500).send('Server Error');
   }
 
+
 }
-module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent };
+
+
+const getTopEmployers = async (req, res) => {
+  try {
+    // Get all employers and count the number of jobs posted by each
+    const employers = await job_Models.aggregate([
+      { $group: { _id: "$employerID", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Get the top 5 employers
+    const topEmployers = employers.slice(0, 5);
+
+    // Get employer details and add job count to each
+    const employerDetails = await Promise.all(
+      topEmployers.map(async (employer) => {
+        const employerInfo = await Employer.findById(employer._id);
+        return {
+          id: employerInfo._id,
+          name: employerInfo.name,
+          email: employerInfo.email,
+          jobCount: employer.count,
+          userPhoto: employerInfo.userPhoto,
+          companyPhoto:employerInfo.companyPhoto,
+          company:employerInfo.companyName,
+          
+          
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: employerDetails,
+      message: "Top 5 employers by job count"
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: 'Server error',
+    });
+  }
+};
+
+
+module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent, getTopEmployers };

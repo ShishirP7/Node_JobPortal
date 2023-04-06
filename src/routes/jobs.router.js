@@ -25,7 +25,8 @@ const {
   getApplicantCountByCategory,
   getPricing,
   getEmployerProfileCompletion,
-  getProfilePercent
+  getProfilePercent,
+  getJobsbyCategory
 } = require("../controllers/jobController");
 
 
@@ -36,6 +37,7 @@ jobsRouter.get("/getApprovedJobs", getApprovedJobs);
 jobsRouter.get("/getPostedJobs", getPostedJobs);
 jobsRouter.get("/getAllJobs", getAllJobs);
 jobsRouter.get("/getjobsByID", getjobsByID);
+jobsRouter.get("/getJobsbyCategory", getJobsbyCategory);
 jobsRouter.post("/bookmark", jobBookmarks);
 jobsRouter.post("/removeJob", removeJob);
 jobsRouter.get("/getSavedJobs", getSavedJobs);
