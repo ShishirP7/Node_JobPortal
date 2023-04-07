@@ -9,6 +9,7 @@ const job_Models = require("../models/job_Models");
 const { find } = require("../models/savedJob_Model");
 const Payment = require("../models/payment_Modal");
 const mongoose = require('mongoose');
+const Employer = require("../models/employer_Model");
 
 
 const getApprovedJobs = async (req, res) => {
@@ -428,11 +429,11 @@ const rejectCategoryChange = async (req, res) => {
 
 
 const getRecentApplicants = async (req, res) => {
-  const { employerId } = req.params;
+  const { employerId } = req.query;
 
   try {
     // Find the job postings of the provided employer ID
-    const jobs = await jobModel.find({ employer_id: employerId });
+    const jobs = await jobModel.find({ employerID: employerId });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({ error: 'No job postings found for the provided employer ID' });
@@ -461,11 +462,11 @@ const getRecentApplicants = async (req, res) => {
 }
 
 const getMostAppliedJob = async (req, res) => {
-  const { employerId } = req.params;
+  const { employerId } = req.query;
 
   try {
     // Find the job postings of the provided employer ID
-    const jobs = await jobModel.find({ employer_id: employerId });
+    const jobs = await jobModel.find({ employerID: employerId });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({ error: 'No job postings found for the provided employer ID' });
@@ -509,11 +510,11 @@ const getMostAppliedJob = async (req, res) => {
 }
 
 const JobsApplicantCount = async (req, res) => {
-  const { employerId } = req.params;
+  const { employerId } = req.query;
 
   try {
     // Find the job postings of the provided employer ID
-    const jobs = await jobModel.find({ employer_id: employerId });
+    const jobs = await jobModel.find({ employerID: employerId });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({ error: 'No job postings found for the provided employer ID' });
@@ -543,69 +544,67 @@ const JobsApplicantCount = async (req, res) => {
 
 
 const getEmployerStats = async (req, res) => {
-  const { employerId } = req.params;
 
   try {
-    // Get the number of job postings of the provided employer ID
-    const jobPostingCount = await jobModel.countDocuments({ employer_id: employerId });
+    const employerId = mongoose.Types.ObjectId(req.query.employerId);
 
-    // Get the number of applicants for the jobs posted by the employer
-    const jobs = await jobModel.find({ employer_id: employerId });
-    const jobIds = jobs.map((job) => job._id);
-    const applicantCount = await JobApplicant.countDocuments({ job_id: { $in: jobIds } });
+    // Get the job count
+    const jobCount = await Job.countDocuments({ employerID: employerId });
 
-    // Get the number of saved jobs for the employer
-    const savedJobCount = await SavedJobs.countDocuments({ employer_id: employerId });
+    // Get the applicant count
+    const applicantCount = await JobApplicant.countDocuments({ job_id: { $in: await Job.find({ employerID: employerId }).distinct('_id') } });
 
-    res.status(200).json({
-      data: {
-        jobPostingCount,
-        applicantCount,
-        savedJobCount
-      },
-      message: "Employer statistics",
-      success: true
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    const savedJobCount = await SavedJobs.countDocuments({ job_id: { $in: await Job.find({ employerID: employerId }).distinct('_id') } });
+    // Send the response
+    res.status(200).json({ jobCount, applicantCount, savedJobCount });
+  } catch (error) {
+    console.log(error, "erro")
   }
+
 }
 
 const getJobCategoryCount = async (req, res) => {
   try {
-    const { employerId } = req.params;
-
-    // Group jobs by category and get count of jobs for each category
-    const jobCountByCategory = await Job.aggregate([
-      {
-        $match: {
-          employer: employerId,
-        },
-      },
-      {
-        $group: {
-          _id: "$category",
-          count: { $sum: 1 },
-        },
-      },
-    ]);
-
-    // Prepare response object with counts for each category
-    const response = {
-      basic: 0,
-      premium: 0,
-      hot: 0,
-      featured: 0,
+    const { employerId } = req.query;
+    const categories = [0, 1, 2, 3];
+    const categoryLabels = {
+      0: "basic",
+      1: "premium",
+      2: "hot",
+      3: "featured"
     };
-    jobCountByCategory.forEach((category) => {
-      if (category._id === 0) response.basic = category.count;
-      if (category._id === 1) response.premium = category.count;
-      if (category._id === 2) response.hot = category.count;
-      if (category._id === 3) response.featured = category.count;
-    });
 
-    res.json({ data: response, success: true, message: "Success" });
+    // Find the count of all jobs for each category for the specified employer
+    jobModel.find({ employerID: employerId })
+      .exec((err, jobs) => {
+        if (err) {
+          console.log(err);
+        } else {
+          // Create an object to store the counts for each category
+          const counts = {};
+          categories.forEach((category) => {
+            counts[category] = 0;
+          });
+
+          // Increment the count for each job with the corresponding category
+          jobs.forEach((job) => {
+            if (job.category in counts) {
+              counts[job.category]++;
+            }
+          });
+
+          // Convert category numbers to labels in the response
+          const response = categories.map((category) => {
+            return {
+              label: categoryLabels[category],
+              value: counts[category]
+            };
+          });
+
+          // Return the response to the client
+          res.status(200).json({ data: response, message: "job category count", succes: true });
+        }
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -614,15 +613,12 @@ const getJobCategoryCount = async (req, res) => {
 
 
 
-
-
-
 const getApplicantCountByCategory = async (req, res) => {
   try {
-    const { employerId } = req.params;
+    const { employerId } = req.query;
 
     // Get the job IDs for the jobs posted by the employer
-    const jobs = await jobModel.find({ employer_id: employerId });
+    const jobs = await jobModel.find({ employerID: employerId });
     const jobIds = jobs.map((job) => job._id);
 
     // Group applicants by category and get count of applicants for each category
@@ -675,11 +671,11 @@ const getApplicantCountByCategory = async (req, res) => {
 
 
 const getPricing = async (req, res) => {
-  const { employerId } = req.params;
+  const { employerId } = req.query;
 
   try {
     // Find the job postings of the provided employer ID
-    const jobs = await jobModel.find({ employer_id: employerId });
+    const jobs = await jobModel.find({ employerID: employerId });
 
     if (!jobs || jobs.length === 0) {
       return res.status(404).json({ error: 'No job postings found for the provided employer ID' });
@@ -727,6 +723,43 @@ const getPricing = async (req, res) => {
 
 
 
+const getAllEmployerJobs = async (req, res) => {
+  try {
+    // Find all employers
+    const employers = await employerModel.find();
+
+    // Loop through each employer to find their jobs and applicants
+    const employerData = await Promise.all(employers.map(async (employer) => {
+      const jobs = await jobModel.find({ employerID: employer._id });
+
+      // Loop through each job to find the total number of applicants
+      const jobData = await Promise.all(jobs.map(async (job) => {
+        const applicants = await JobApplicant.find({ job_id: job._id });
+
+        return {
+          ...job.toObject(),
+          applicantCount: applicants.length,
+        };
+      }));
+
+      return {
+        ...employer.toObject(),
+        jobs: jobData,
+      };
+    }));
+
+    res.status(200).json({ data: employerData, message: 'Employer job and applicant data retrieved successfully', success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
+
+
+
+
 
 const getJobsbyCategory = async (req, res) => {
   try {
@@ -748,6 +781,172 @@ const getJobsbyCategory = async (req, res) => {
     });
   } catch (error) {
     console.log(error)
+  }
+};
+
+
+
+const getDashboardData = async (req, res) => {
+  try {
+    const activeEmployeeCount = await employerModel.countDocuments({ verified: true, isActive: true });
+    const applicantCount = await JobApplicant.countDocuments();
+    const activeJobCount = await jobModel.countDocuments({ isApproved: true, isActive: true });
+    const nonApprovedEmployerCount = await employerModel.countDocuments({ isApproved: false });
+    const nonVerifiedJobCount = await jobModel.countDocuments({ verified: false });
+
+    res.status(200).json({
+      data: {
+        activeEmployeeCount,
+        applicantCount,
+        activeJobCount,
+        nonApprovedEmployerCount,
+        nonVerifiedJobCount,
+      },
+      message: 'Counts retrieved successfully',
+      success: true,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
+const getJobCountByCategory = async (req, res) => {
+  try {
+    const jobCounts = await jobModel.aggregate([
+      {
+        $group: {
+          _id: {
+            $switch: {
+              branches: [
+                { case: { $eq: ['$category', 0] }, then: 'basic' },
+                { case: { $eq: ['$category', 1] }, then: 'hot' },
+                { case: { $eq: ['$category', 2] }, then: 'premium' },
+                { case: { $eq: ['$category', 3] }, then: 'featured' },
+              ],
+              default: 'unknown'
+            }
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const formattedCounts = {
+      basic: 0,
+      hot: 0,
+      premium: 0,
+      featured: 0,
+    };
+
+    jobCounts.forEach((jobCount) => {
+      formattedCounts[jobCount._id] = jobCount.count;
+    });
+
+    res.status(200).json({
+      data: formattedCounts,
+      message: 'Job count by category retrieved successfully',
+      success: true,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+
+// testing /
+
+const getDatas = async (req, res) => {
+  // try {
+  //   Payment.aggregate([
+
+  //     {
+  //       $group: {
+  //         _id: "$employerID",
+  //         totalAmount: {
+  //           $sum: {
+  //             $switch: {
+  //               branches: [
+  //                 { case: { $eq: ["$newCategory", "1"] }, then: 10000 },
+  //                 { case: { $eq: ["$newCategory", "2"] }, then: 15000 },
+  //                 { case: { $eq: ["$newCategory", "3"] }, then: 20000 },
+  //               ],
+  //               default: 0
+  //             }
+  //           }
+  //         }
+  //       }
+  //     },
+  //     {
+  //       $project: {
+  //         _id: 0,
+  //         employerID: "$_id",
+  //         totalAmount: 1
+  //       }
+  //     }
+  //   ], function (err, result) {
+  //     if (err) {
+  //       console.log(err);
+  //     } else {
+  //       res.json(result)
+  //     }
+  //   });
+
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).json({ message: 'Internal server error' });
+  // }
+};
+
+
+const getTopEmployer = async (req, res) => {
+  try {
+    const result = await jobModel.aggregate([
+      {
+        $group: {
+          _id: "$employerID",
+          totalJobs: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { totalJobs: -1 } // sort in descending order
+      },
+      {
+        $limit: 5 // get the top 5 employers
+      },
+      {
+        $lookup: {
+          from: "employers", // collection name in database
+          localField: "_id",
+          foreignField: "_id",
+          as: "employer"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          totalJobs: 1,
+          employer: {
+            $arrayElemAt: ["$employer", 0]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          totalJobs: 1,
+          "employer.userPhoto": 1,
+          "employer.name": 1,
+          "employer.companyName": 1
+        }
+      }
+    ]);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -784,5 +983,10 @@ module.exports = {
   getApplicantCountByCategory,
   getPricing,
   getJobsbyCategory
+  , getAllEmployerJobs,
+  getDashboardData,
+  getJobCountByCategory,
+  getDatas,
+  getTopEmployer
 
 };

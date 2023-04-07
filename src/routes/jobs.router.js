@@ -26,7 +26,14 @@ const {
   getPricing,
   getEmployerProfileCompletion,
   getProfilePercent,
-  getJobsbyCategory
+  getJobsbyCategory,
+  getAllPricing,
+  getAllEmployerJobs,
+  getDashboardData,
+  getJobCountByCategory,
+  getemployerSpending,
+  getDatas,
+  getTopEmployer
 } = require("../controllers/jobController");
 
 
@@ -70,6 +77,11 @@ jobsRouter.get("/getEmployerStats", getEmployerStats);
 jobsRouter.get("/getJobCategoryCount", getJobCategoryCount);
 jobsRouter.get("/getApplicantCountByCategory", getApplicantCountByCategory);
 jobsRouter.get("/getPricing", getPricing);
+jobsRouter.get("/getAllEmployerJobs", getAllEmployerJobs);
+jobsRouter.get("/getDashboardData", getDashboardData);
+jobsRouter.get("/getJobCountByCategory", getJobCountByCategory);
+// jobsRouter.get("/getDatas", getDatas);
+jobsRouter.get("/getTopEmployer", getTopEmployer);
 
 
 module.exports = jobsRouter;

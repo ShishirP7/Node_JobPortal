@@ -21,6 +21,9 @@ const paymentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    paymentAmount: {
+        type: String
+    },
     paymentMethod: {
 
         type: String,
