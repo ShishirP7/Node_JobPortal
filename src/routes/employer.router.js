@@ -1,5 +1,5 @@
 const express = require("express");
-const { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent, getTopEmployers } = require("../controllers/employerController");
+const { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent, getTopEmployers, getSelectedApplicants } = require("../controllers/employerController");
 const { addJob, removeJob, editJob } = require("../controllers/jobController");
 const employerRouter = express.Router();
 employerRouter.post("/reset", reset);
@@ -14,5 +14,6 @@ employerRouter.post("/acceptApplicant", acceptApplicant);
 employerRouter.post("/rejectApplicant", rejectApplicant);
 employerRouter.get("/getProfilePercent", getProfilePercent);
 employerRouter.get("/getTopEmployers", getTopEmployers);
+employerRouter.get("/getSelectedApplicants", getSelectedApplicants);
 
 module.exports = employerRouter;

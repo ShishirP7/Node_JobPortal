@@ -29,15 +29,19 @@ const signUpController = async (req, res) => {
         res.json({ message: error.message });
     }
 };
+//seeker controller for signup 
 const signUpSeeker = async (req, res) => {
+
     const { name, email, password, phoneNumber, role } = req.body;
 
     try {
+        //find user in databse
         const existingUser = await JobSeeker.findOne({ email: email });
         if (existingUser) {
             res.json({ message: "User already Exists with this email ", success: false })
 
         } else {
+            //hash secret password
             const hasedPassword = await bcrypt.hash(password, 10);
             const createdUser = await JobSeeker.create({
                 name: name,
@@ -46,7 +50,7 @@ const signUpSeeker = async (req, res) => {
                 phoneNumber: phoneNumber ?? "",
                 role: role
             });
-
+            //signup mail service call
             signupSuccessEmail(createdUser, message = `Hello ${createdUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
             res.status(201).json({ data: createdUser, success: true });
 

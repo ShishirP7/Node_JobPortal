@@ -7,6 +7,7 @@ const jobs = require("./jobs.router");
 const { signUpController } = require("../controllers/LoginSignUp/signUpController");
 const { loginController } = require("../controllers/LoginSignUp/loginController");
 const { profileController, editProfileController } = require("../controllers/profileController");
+const { getAllMessage, getAllMessages, getUserMessage, getMessage, postMessage } = require("../controllers/userController");
 
 router.all("/", (req, res) => {
   res.send(" Hello !!");
@@ -19,5 +20,9 @@ router.post("/editProfile", editProfileController);
 router.use("/job", jobs);
 router.use("/authentication/login", loginController)
 router.use("/authentication/signUp", signUpController)
+// router.get("/api/message/getall", getAllMessages)
+// router.post("/api/message/getUserMessage", getUserMessage)
+router.post("/api/message/postMessage", postMessage)
+router.get("/api/message/getMessage", getMessage)
 
 module.exports = router;

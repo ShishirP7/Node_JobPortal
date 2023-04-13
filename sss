@@ -1,0 +1,75 @@
+const server = http.createServer(app);
+const io = socketio(server);
+io.on("connection", (socket) => {
+  // Handle new job seeker connections
+  socket.on("job_seeker_connect", async (data) => {
+    try {
+      // Find the job seeker by email
+      const jobSeeker = await JobSeeker.findOne({ email: data.email });
+
+      // If the job seeker does not exist, send an error message
+      if (!jobSeeker) {
+        socket.emit("job_seeker_connect_error", "Job seeker not found");
+        return;
+      }
+
+      // Associate the job seeker with the Socket.IO connection
+      socket.jobSeekerId = jobSeeker._id;
+
+      // Send a success message
+      socket.emit("job_seeker_connect_success", "Connected as job seeker");
+    } catch (err) {
+      console.error(err);
+      socket.emit("job_seeker_connect_error", "An error occurred");
+    }
+  });
+
+  // Handle new employer connections
+  socket.on("employer_connect", async (data) => {
+    try {
+      // Find the employer by email
+      const employer = await Employer.findOne({ email: data.email });
+
+      // If the employer does not exist, send an error message
+      if (!employer) {
+        socket.emit("employer_connect_error", "Employer not found");
+        return;
+      }
+
+      // Associate the employer with the Socket.IO connection
+      socket.employerId = employer._id;
+
+      // Send a success message
+      socket.emit("employer_connect_success", "Connected as employer");
+    } catch (err) {
+      console.error(err);
+      socket.emit("employer_connect_error", "An error occurred");
+    }
+  });
+
+  // Handle new chat messages
+  socket.on("chat_message", async (data) => {
+    try {
+      // Check that both the job seeker and employer are connected
+      if (!socket.jobSeekerId || !socket.employerId) {
+        socket.emit("chat_error", "Not connected as job seeker and employer");
+        return;
+      }
+
+      // Save the chat message to the database
+      const message = {
+        from: socket.jobSeekerId,
+        to: socket.employerId,
+        text: data.text,
+        timestamp: new Date(),
+      };
+      await ChatMessage.create(message);
+
+      // Send the chat message to both the job seeker and employer
+      io.to(socket.jobSeekerId).to(socket.employerId).emit("chat_message", message);
+    } catch (err) {
+      console.error(err);
+      socket.emit("chat_error", "An error occurred");
+    }
+  });
+});

@@ -294,10 +294,10 @@ const getTopEmployers = async (req, res) => {
           email: employerInfo.email,
           jobCount: employer.count,
           userPhoto: employerInfo.userPhoto,
-          companyPhoto:employerInfo.companyPhoto,
-          company:employerInfo.companyName,
-          
-          
+          companyPhoto: employerInfo.companyPhoto,
+          company: employerInfo.companyName,
+
+
         };
       })
     );
@@ -314,6 +314,45 @@ const getTopEmployers = async (req, res) => {
     });
   }
 };
+const getSelectedApplicants = async (req, res) => {
+  const { user_ID } = req.query;
+  try {
+    const employerDetail = await employerModel.findById(user_ID)
+    if (employerDetail) {
+      const JobLists = await job_Models.find({ employerID: employerDetail._id })
 
+      const selectedApplicants = [];
 
-module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent, getTopEmployers };
+      for (let i = 0; i < JobLists.length; i++) {
+        const job = JobLists[i];
+
+        const jobApplicants = await JobApplicant.find({ job_id: job._id, isSelected: true })
+          .populate({
+            path: "user_id",
+            select: "name profileimg"
+          })
+          .populate({
+            path: "job_id",
+            select: "name jobPhoto"
+          });
+
+        console.log(`Found ${jobApplicants.length} applicants for job ${job._id}`);
+
+        selectedApplicants.push(...jobApplicants);
+      }
+
+      const uniqueApplicants = [...new Set(selectedApplicants.map((applicant) => applicant.user_id._id))].map((id) => {
+        return selectedApplicants.find((applicant) => applicant.user_id._id === id);
+      });
+
+      res.json({ selectedApplicants: uniqueApplicants, success: true });
+
+    } else {
+      res.json({ message: "Employer id not found", success: false })
+    }
+  } catch (error) {
+    res.json({ message: error.message, success: false })
+  }
+}
+
+module.exports = { reset, changeJobType, getApplicantByID, acceptApplicant, rejectApplicant, sendEmail, forgetPassword, getProfilePercent, getTopEmployers, getSelectedApplicants };
