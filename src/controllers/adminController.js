@@ -200,18 +200,6 @@ const approveEmployer = async (req, res) => {
   }
 }
 
-const rejectJob = async (req, res) => {
-  try {
-
-
-  } catch (error) {
-    res.json({ message: error.message, success: false });
-
-  }
-}
-
-
-
 
 const approveJob = async (req, res) => {
   try {

@@ -185,44 +185,6 @@ const setupProfile = async (req, res) => {
 
 }
 
-// const getJobRecommendation = async (req, res) => {
-//   const { seekerId } = req.body;
-
-//   try {
-//     // Get the seeker data from the database
-//     const seeker = await seekerModel.findById(seekerId);
-//     if (!seeker) {
-//       return res.status(404).json({ error: 'Seeker not found' });
-//     }
-
-//     // Extract the seeker's experience year value and skills
-//     const experienceYear = seeker.experienceYear;
-//     const skills = seeker.skills.map(skill => skill.skill);
-
-//     // Construct a regular expression to match any words in the job title
-//     const regex = new RegExp(seeker.title.split(' ').join('|'), 'i');
-
-//     // Get up to 5 recommended jobs from the database based on experience year, job title, and skills
-//     const jobs = await job_Models.find({
-//       $or: [
-//         { Experience: experienceYear },
-//         { title: { $regex: regex } },
-//         { skillsRequired: { $in: skills } }
-//       ],
-//     }).limit(5);
-
-//     if (jobs && jobs.length > 0) {
-//       res.json({ data: jobs, success: true, message: "Job recommendation" });
-//     } else {
-//       res.json({ message: "No jobs found", success: false });
-//     }
-
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
 
 
 const getJobRecommendation = async (req, res) => {
