@@ -20,9 +20,4 @@ router.post("/editProfile", editProfileController);
 router.use("/job", jobs);
 router.use("/authentication/login", loginController)
 router.use("/authentication/signUp", signUpController)
-// router.get("/api/message/getall", getAllMessages)
-// router.post("/api/message/getUserMessage", getUserMessage)
-router.post("/api/message/postMessage", postMessage)
-router.get("/api/message/getMessage", getMessage)
-
 module.exports = router;

@@ -5,7 +5,7 @@ const SERCRET_KEY = "JOBPortal";
 const { response } = require("express");
 const job_Models = require("../models/job_Models");
 const JobApplicant = require("../models/JobApplicant");
-const { signupSuccessEmail } = require("../services/mailerService");
+const { signupSuccessEmail, resetPasswordEmail } = require("../services/mailerService");
 const tokenSchema = require("../models/tokenSchema");
 const { sendMail } = require("../config/nodemailer/mailer");
 const Employer = require("../models/employer_Model");
@@ -13,42 +13,137 @@ const JobSeeker = require("../models/SeekerModels/jobSeeker_Model");
 
 
 const reset = async (req, res) => {
-  const { email, password, newpassword } = req.body;
+  const { id, password, newpassword, confirmpassword } = req.body;
 
   try {
-    const existingUser = await seekerModel.findOne({ email: email });
-    const authorizedUser = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    const existingUser = await seekerModel.findById(id);
 
-    if (authorizedUser && existingUser) {
-      const hasedPassword = await bcrypt.hash(newpassword, 10);
-      await seekerModel.findOneAndUpdate(
-        { email: email },
-        {
-          $set: {
-            password: hasedPassword,
-          },
-        }
-      );
-      res.json({ success: true, message: "Updated Succeessfully" });
-    }
-    if (!authorizedUser) {
-      return res.json({
-        message: "Provided Password Is Incorrect",
-      });
-    }
     if (!existingUser) {
       return res.json({
-        message: "Email not found",
+        message: "User not found",
+        success: false
       });
     }
+
+    const authorizedUser = await bcrypt.compare(password, existingUser.password);
+
+    if (!authorizedUser) {
+      return res.json({
+        message: "Incorrect password",
+        success: false
+      });
+    }
+
+    if (newpassword !== confirmpassword) {
+      return res.json({
+        message: "New passwords do not match",
+        success: false
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+
+    // Update the password in the database
+    await seekerModel.findByIdAndUpdate(id, { password: hashedPassword });
+
+    // Verify the updated password
+    const updatedUser = await seekerModel.findById(id);
+    const isPasswordCorrect = await bcrypt.compare(newpassword, updatedUser.password);
+
+    if (!isPasswordCorrect) {
+      return res.json({
+        message: "Error: Password update unsuccessful",
+        success: false
+      });
+    }
+    resetPasswordEmail(updatedUser.email, subject = `Hello ${updatedUser.name}, Your account has been created successfully. We are thrilled to have you as a part of our team. Thank you for choosing us, and we look forward to providing you with the best experience possible. If you have any questions or concerns, don't hesitate to reach out to our support team. Once again, welcome aboard! `)
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
   } catch (error) {
-    console.log(error);
-    res.json({ message: error.message });
+    console.error(error);
+    res.json({
+      message: error.message,
+      success: false
+    });
   }
 };
+
+
+
+const forgetPassword = async (req, res) => {
+  try {
+    const { email, otp, newpassword } = req.body;
+
+    const data = await OTP_MODAL.findOne({ email: email, code: otp })
+    if (!data) {
+      return res.json({ message: "Invalid OTP", success: false });
+    }
+
+    const currentTime = new Date().getTime();
+    if (data.expireIn < currentTime) {
+      return res.json({ message: "Token Expired", success: false });
+    }
+
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+    const user = await employerModel.findOneAndUpdate({ email: email }, { password: hashedPassword })
+    if (!user) {
+      return res.json({ message: "User not found", success: false });
+    }
+
+    return res.json({ message: "Password Reset Successful", success: true });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error", success: false });
+  }
+}
+
+const sendEmail = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const existingUser = await employerModel.findOne({ email: email });
+    if (existingUser) {
+      const code = Math.floor(Math.random() * 1000000);
+      const OTPDatas = new OTP_MODAL({
+        email: email,
+        code: code,
+        expireIn: new Date().getTime() + 300 * 1000
+      })
+      const OTPResponse = await OTPDatas.save();
+      const text = `Your verification code is ${code}. Please enter this code to reset your password.`;
+      const mail = {
+        from: "sishirpaudel7@gmail.com",
+        to: email,
+        subject: "Reset Password - Verification Code",
+        text: text
+      };
+
+      await resetPasswordEmail(email, mail.subject, mail.text);
+
+      res.json({
+        success: true,
+        message: "Verification code sent successfully"
+      });
+    }
+
+    else {
+      return res.json({
+        message: "User not found",
+        success: false
+      });
+    }
+
+  } catch (error) {
+    console.error(error);
+    res.json({
+      message: error.message,
+      success: false
+    });
+  }
+};
+
 
 
 const resetLink = async (req, res) => {
@@ -89,7 +184,7 @@ const resetPassword = async (req, res) => {
   try {
 
     const user = await seekerModel.findById(req.query.id);
-    res.send({ data: user, message: "helo" })
+    res.send({ data: user, message: "resetpassword" })
 
 
   } catch (error) {
@@ -274,4 +369,4 @@ const getRecommendation = async (req, res) => {
 };
 
 
-module.exports = { reset, setupProfile, resetLink, editProfile, apply, resetPassword, getJobRecommendation, getRecommendation };
+module.exports = {forgetPassword,sendEmail, reset, setupProfile, resetLink, editProfile, apply, resetPassword, getJobRecommendation, getRecommendation };
